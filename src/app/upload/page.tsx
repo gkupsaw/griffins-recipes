@@ -1,5 +1,7 @@
 'use client';
 
+import { faImage } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import Image from 'next/image';
 import { useState } from 'react';
 
@@ -37,15 +39,16 @@ export default function RecipeForm() {
                         onChange={(e) => setRecipeName(e.target.value)}
                         className='text-5xl text-center'
                     />
-                    {recipeImage && (
+                    {recipeImage ? (
                         <Image
-                            className='dark'
                             src={URL.createObjectURL(recipeImage)}
                             alt='Uploaded recipe photo'
-                            width={480}
-                            height={480}
+                            height={360}
+                            width={360}
                             priority
                         />
+                    ) : (
+                        <FontAwesomeIcon icon={faImage} style={{ width: 360, height: 360 }} />
                     )}
 
                     <input
