@@ -1,0 +1,129 @@
+'use client';
+
+import { faImage } from '@fortawesome/free-regular-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { downloadData } from 'aws-amplify/storage';
+import Image from 'next/image';
+import { useEffect, useState } from 'react';
+
+type RecipeData = {
+    readonly recipeDate: Date;
+    readonly recipeName: string;
+    readonly recipeDesc: string;
+    readonly recipeIngredients: string[];
+    readonly recipeSteps: string[];
+};
+
+const gray = {
+    primary: 'bg-gray-800',
+    secondary: 'bg-gray-500',
+};
+
+const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text-left';
+const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
+
+const LOADING = 'Loading...';
+
+export default function RecipePage() {
+    const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
+    const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
+
+    useEffect(() => {
+        async function loadData() {
+            const searchParams = new URLSearchParams(document.location.search);
+            const recipeDirName = searchParams.get('recipename');
+
+            if (recipeDirName === null) {
+                return window.alert('This URL has no recipe, nothing will be loaded');
+            }
+
+            await downloadData({ path: `recipe-data/${recipeDirName}/data.json` })
+                .result.then(({ body }) =>
+                    body
+                        .text()
+                        .then((text) => setRecipeData(JSON.parse(text)))
+                        .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`))
+                )
+                .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
+
+            await downloadData({ path: `recipe-data/${recipeDirName}/image.png` })
+                .result.then(({ body }) =>
+                    body
+                        .blob()
+                        .then((image) => setRecipeImage(image))
+                        .catch((e) => window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`))
+                )
+                .catch((e) => window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`));
+        }
+
+        loadData();
+    }, []);
+
+    const loading = recipeImage === null || recipeData === null;
+
+    return (
+        <div className='font-mono grid items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
+            <main className='flex flex-col gap-[32px] row-start-2 sm:items-start'>
+                <div id='Title' className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'>
+                    <p className='text-center pb-4'>{loading ? LOADING : recipeData.recipeName}</p>
+                    {loading ? (
+                        <FontAwesomeIcon icon={faImage} style={{ width: 360, height: 360 }} />
+                    ) : (
+                        <Image
+                            src={URL.createObjectURL(recipeImage)}
+                            alt='Recipe photo'
+                            height={360}
+                            width={360}
+                            style={{ height: 'auto', width: 'auto' }}
+                            priority
+                        />
+                    )}
+                </div>
+                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center sm:items-start'>
+                    <p className='text-3xl text-center text-left'>
+                        Born on {recipeData?.recipeDate?.toLocaleDateString() ?? LOADING}
+                    </p>
+                    <p className={textAreaClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
+                    <hr />
+                    <div
+                        id='Ingredients'
+                        className='flex w-full flex-col gap-[2px] row-start-2 items-center sm:items-start'
+                    >
+                        <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
+                            <p className='flex-grow text-3xl text-center text-left'>Ingredients</p>
+                        </div>
+                        <ul className={listClass}>
+                            {(loading ? [LOADING] : recipeData.recipeIngredients).map((ingredient, i) => (
+                                <li key={i} className={textAreaClass}>
+                                    {ingredient}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                    <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center sm:items-start'>
+                        <div id='Steps title' className='flex flex-row w-full items-stretch'>
+                            <p className='flex-grow text-3xl text-center text-left'>Steps</p>
+                        </div>
+                        <ul className={listClass}>
+                            {(loading ? [LOADING] : recipeData.recipeSteps).map((step, i) => (
+                                <li key={i} className={textAreaClass}>
+                                    {step}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            </main>
+            <footer className='row-start-3 flex gap-[24px] flex-wrap items-center justify-center pt-8'>
+                <a
+                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    href='https://www.griffinkupsaw.com/'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                >
+                    Click me!
+                </a>
+            </footer>
+        </div>
+    );
+}

@@ -9,6 +9,14 @@ import { getUrl, uploadData } from 'aws-amplify/storage';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
+type RecipeData = {
+    readonly recipeDate: Date;
+    readonly recipeName: string;
+    readonly recipeDesc: string;
+    readonly recipeIngredients: string[];
+    readonly recipeSteps: string[];
+};
+
 const gray = {
     primary: 'bg-gray-800',
     secondary: 'bg-gray-500',
@@ -47,7 +55,7 @@ export default function RecipeForm() {
     }, []);
 
     async function handleUpload() {
-        const recipeData = {
+        const recipeData: RecipeData = {
             recipeDate,
             recipeName,
             recipeDesc,
@@ -113,7 +121,7 @@ export default function RecipeForm() {
 
     return (
         <div className='font-sans grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20'>
-            <Authenticator>
+            <Authenticator hideSignUp>
                 {({ signOut }) => (
                     <form className='font-mono flex flex-col gap-[32px] row-start-2 sm:items-start'>
                         <div
@@ -124,7 +132,7 @@ export default function RecipeForm() {
                                 value={recipeName}
                                 placeholder='Recipe name'
                                 onChange={(e) => setRecipeName(e.target.value)}
-                                className='text-center'
+                                className='text-center pb-4'
                             />
                             {recipeImageFile ? (
                                 <Image
@@ -132,7 +140,7 @@ export default function RecipeForm() {
                                     alt='Uploaded recipe photo'
                                     height={360}
                                     width={360}
-                                    style={{ height: 'auto' }}
+                                    style={{ height: 'auto', width: 'auto' }}
                                     priority
                                 />
                             ) : (
