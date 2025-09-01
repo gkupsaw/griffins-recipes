@@ -3,10 +3,10 @@
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { downloadData } from 'aws-amplify/storage';
-import Image from 'next/image';
+import Image, { StaticImageData } from 'next/image';
 import { redirect } from 'next/navigation';
-import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
+import defaultRecipeImage from '../img/default.png';
 
 type RecipeData = {
     readonly recipeDate: Date;
@@ -27,8 +27,9 @@ const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-
 const LOADING = 'Loading...';
 
 export default function RecipePage() {
-    const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
     const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
+    const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
+    const [recipeImageNotFound, setRecipeImageNotFound] = useState<boolean>(false);
 
     useEffect(() => {
         async function loadData() {
@@ -43,8 +44,14 @@ export default function RecipePage() {
                 .result.then(({ body }) =>
                     body
                         .text()
-                        .then((text) => setRecipeData(JSON.parse(text)))
-                        .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`))
+                        .then((text) => {
+                            const parsedRecipeData: RecipeData = JSON.parse(text);
+                            setRecipeData({
+                                ...parsedRecipeData,
+                                recipeDate: new Date(parsedRecipeData.recipeDate),
+                            });
+                        })
+                        .catch((e) => window.alert(`Could not unpack recipe ${recipeDirName}: ${e}`))
                 )
                 .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
 
@@ -53,26 +60,29 @@ export default function RecipePage() {
                     body
                         .blob()
                         .then((image) => setRecipeImage(image))
-                        .catch((e) => window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`))
+                        .catch((e) => window.alert(`Could not unpack image for recipe ${recipeDirName}: ${e}`))
                 )
-                .catch((e) => window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`));
+                .catch((e) => {
+                    console.warn(`Could not retrieve image for recipe ${recipeDirName}, using default: ${e}`);
+                    setRecipeImageNotFound(true);
+                });
         }
 
         loadData();
     }, []);
 
-    const loading = recipeImage === null || recipeData === null;
+    const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
 
     return (
         <div className='font-mono grid items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
-            <main className='flex flex-col gap-[32px] row-start-2 sm:items-start'>
+            <main className='flex flex-col gap-[32px] row-start-2 justify-center sm:items-start'>
                 <div id='Title' className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'>
                     <p className='text-center pb-4'>{loading ? LOADING : recipeData.recipeName}</p>
                     {loading ? (
                         <FontAwesomeIcon icon={faImage} style={{ width: 360, height: 360 }} />
                     ) : (
                         <Image
-                            src={URL.createObjectURL(recipeImage)}
+                            src={recipeImage === null ? defaultRecipeImage : URL.createObjectURL(recipeImage)}
                             alt='Recipe photo'
                             height={360}
                             width={360}

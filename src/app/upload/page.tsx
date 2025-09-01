@@ -63,13 +63,8 @@ export default function RecipeForm() {
             recipeSteps,
         };
 
-        if (
-            recipeImageFile === null ||
-            [recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)
-        ) {
-            return console.error(
-                `Invalid input: recipeData=${JSON.stringify(recipeData)} recipeImageFile=${recipeImageFile}`
-            );
+        if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
+            return console.error(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
         }
 
         const recipeDirName = recipeData.recipeName.replace(/[^a-zA-Z0-9]/g, '_');
@@ -111,12 +106,14 @@ export default function RecipeForm() {
             data: JSON.stringify(recipeData),
         });
 
-        console.log('Uploading image...');
+        if (recipeImageFile !== null) {
+            console.log('Uploading image...');
 
-        uploadData({
-            path: recipeImagePath,
-            data: recipeImageFile,
-        });
+            uploadData({
+                path: recipeImagePath,
+                data: recipeImageFile,
+            });
+        }
     }
 
     return (
