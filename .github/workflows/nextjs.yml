@@ -74,7 +74,7 @@ jobs:
             - name: Install dependencies
               run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
             - name: Build with Amplify
-              run: npx ampx generate
+              run: npx ampx generate outputs
             - name: Build with Next.js
               run: ${{ steps.detect-package-manager.outputs.runner }} next build
             - name: Upload artifact
