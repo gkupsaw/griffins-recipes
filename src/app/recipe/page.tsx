@@ -4,6 +4,8 @@ import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { downloadData } from 'aws-amplify/storage';
 import Image from 'next/image';
+import { redirect } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 
 type RecipeData = {
@@ -34,7 +36,7 @@ export default function RecipePage() {
             const recipeDirName = searchParams.get('recipename');
 
             if (recipeDirName === null) {
-                return window.alert('This URL has no recipe, nothing will be loaded');
+                redirect('/');
             }
 
             await downloadData({ path: `recipe-data/${recipeDirName}/data.json` })
