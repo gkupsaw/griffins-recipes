@@ -1,0 +1,49 @@
+{
+  "auth": {
+    "user_pool_id": "us-east-1_eD6azVmgJ",
+    "aws_region": "us-east-1",
+    "user_pool_client_id": "e13sgsefa11hqq04tfna9dtm9",
+    "identity_pool_id": "us-east-1:a10ea7b8-62af-43fd-ba67-005d3640ac5a",
+    "mfa_methods": [],
+    "standard_required_attributes": [
+      "email"
+    ],
+    "username_attributes": [
+      "email"
+    ],
+    "user_verification_types": [
+      "email"
+    ],
+    "groups": [],
+    "mfa_configuration": "NONE",
+    "password_policy": {
+      "min_length": 8,
+      "require_lowercase": true,
+      "require_numbers": true,
+      "require_symbols": true,
+      "require_uppercase": true
+    },
+    "oauth": {
+      "identity_providers": [
+        "GOOGLE"
+      ],
+      "redirect_sign_in_uri": [
+        "http://localhost:3000/upload"
+      ],
+      "redirect_sign_out_uri": [
+        "http://localhost:3000/"
+      ],
+      "response_type": "code",
+      "scopes": [
+        "phone",
+        "email",
+        "openid",
+        "profile",
+        "aws.cognito.signin.user.admin"
+      ],
+      "domain": "8b7e6199aaabfa309ac0.auth.us-east-1.amazoncognito.com"
+    },
+    "unauthenticated_identities_enabled": true
+  },
+  "version": "1.4"
+}

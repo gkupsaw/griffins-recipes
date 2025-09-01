@@ -2,8 +2,10 @@
 
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AuthUser, fetchAuthSession, getCurrentUser, signInWithRedirect, signOut } from 'aws-amplify/auth';
+import { Hub } from 'aws-amplify/utils';
 import Image from 'next/image';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const gray = {
     primary: 'bg-gray-800',
@@ -17,6 +19,8 @@ const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-
 export default function RecipeForm() {
     const recipeDate = new Date();
 
+    const [user, setUser] = useState<AuthUser | null>(null);
+
     const [recipeName, setRecipeName] = useState('');
     const [recipeDesc, setRecipeDesc] = useState('');
     const [recipeImage, setRecipeImage] = useState<File | null>(null);
@@ -29,9 +33,39 @@ export default function RecipeForm() {
         // TODO: Upload remaining data to S3 bucket under /data
     };
 
+    useEffect(() => {
+        const unsubscribe = Hub.listen('auth', ({ payload }) => {
+            switch (payload.event) {
+                case 'signInWithRedirect':
+                    getUser();
+                    break;
+                case 'signInWithRedirect_failure':
+                    console.error('An error has occurred during the OAuth flow.');
+                    break;
+            }
+        });
+
+        getUser();
+
+        return unsubscribe;
+    }, []);
+
+    const getUser = async (): Promise<void> => {
+        try {
+            setUser(await getCurrentUser());
+            console.log('Signed in');
+        } catch (error) {
+            console.error(error);
+            console.log('Not signed in');
+        }
+    };
+
     return (
         <div className='font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20'>
+            <button onClick={() => signInWithRedirect({ provider: 'Google' })}>Open Google</button>
+            <button onClick={() => signOut({ global: false })}>Sign out</button>
             <form className='font-mono flex flex-col gap-[32px] row-start-2 sm:items-start' onSubmit={onSubmit}>
+                {user && <h1>Hello {user.username}</h1>}
                 <div id='Title' className='flex flex-1 flex-col gap-[16px] row-start-2 items-center sm:items-center'>
                     <input
                         value={recipeName}
