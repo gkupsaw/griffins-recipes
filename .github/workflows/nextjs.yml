@@ -73,6 +73,11 @@ jobs:
                       ${{ runner.os }}-nextjs-${{ hashFiles('**/package-lock.json', '**/yarn.lock') }}-
             - name: Install dependencies
               run: ${{ steps.detect-package-manager.outputs.manager }} ${{ steps.detect-package-manager.outputs.command }}
+            - name: Configure AWS Credentials
+              uses: aws-actions/configure-aws-credentials@main # Or a specific version
+              with:
+                  role-to-assume: arn:aws:iam::188458653545:role/Github
+                  aws-region: us-east-1
             - name: Build with Amplify
               run: npx ampx generate outputs
             - name: Build with Next.js
