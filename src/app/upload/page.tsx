@@ -6,7 +6,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import { downloadData, getUrl, uploadData } from 'aws-amplify/storage';
+import { downloadData, getUrl, list, uploadData } from 'aws-amplify/storage';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -36,6 +36,9 @@ export default function RecipeForm() {
     const [submitting, setSubmitting] = useState(false);
     const [importing, setImporting] = useState(false);
 
+    const [existingRecipes, setExistingRecipes] = useState<string[] | null>(null);
+    const [existingRecipeToImport, setExistingRecipeToImport] = useState<string>('');
+
     const [user, setUser] = useState<AuthUser | null>(null);
 
     const [recipeName, setRecipeName] = useState('');
@@ -56,16 +59,38 @@ export default function RecipeForm() {
             .catch((e) => {
                 console.log(`Could not retrieve current user: ${e}`);
             });
+
+        async function loadExistingRecipes() {
+            const topLevelFolder = 'recipe-data';
+            await list({
+                path: `${topLevelFolder}/`,
+                options: {
+                    listAll: true,
+                    subpathStrategy: {
+                        strategy: 'exclude',
+                        delimiter: '/',
+                    },
+                },
+            })
+                .then((result) => {
+                    setExistingRecipes(
+                        result.excludedSubpaths?.map(
+                            (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
+                        ) ?? []
+                    );
+                })
+                .catch((e) => window.alert(`Could not retrieve recipes: ${e}`));
+        }
+
+        loadExistingRecipes();
     }, []);
 
     async function handleImport() {
-        const importedRecipeName = window.prompt('Input recipe name');
-
-        if (!importedRecipeName) {
+        if (!existingRecipeToImport) {
             return window.alert('No recipe name provided');
         }
 
-        await downloadData({ path: `recipe-data/${importedRecipeName}/data.json` })
+        await downloadData({ path: `recipe-data/${existingRecipeToImport}/data.json` })
             .result.then(({ body }) =>
                 body
                     .text()
@@ -77,20 +102,20 @@ export default function RecipeForm() {
                         setIngredients(parsedRecipeData.recipeIngredients);
                         setSteps(parsedRecipeData.recipeSteps);
                     })
-                    .catch((e) => window.alert(`Could not unpack recipe ${importedRecipeName}: ${e}`))
+                    .catch((e) => window.alert(`Could not unpack recipe ${existingRecipeToImport}: ${e}`))
             )
-            .catch((e) => window.alert(`Could not retrieve recipe ${importedRecipeName}: ${e}`));
+            .catch((e) => window.alert(`Could not retrieve recipe ${existingRecipeToImport}: ${e}`));
 
-        await downloadData({ path: `recipe-data/${importedRecipeName}/image.png` })
+        await downloadData({ path: `recipe-data/${existingRecipeToImport}/image.png` })
             .result.then(({ body }) =>
                 body
                     .blob()
                     .then((blob) => {
                         setRecipeImageFile(new File([blob], 'image.png'));
                     })
-                    .catch((e) => window.alert(`Could not unpack image for recipe ${importedRecipeName}: ${e}`))
+                    .catch((e) => window.alert(`Could not unpack image for recipe ${existingRecipeToImport}: ${e}`))
             )
-            .catch((e) => window.alert(`Could not retrieve image for recipe ${importedRecipeName}: ${e}`));
+            .catch((e) => window.alert(`Could not retrieve image for recipe ${existingRecipeToImport}: ${e}`));
     }
 
     async function handleUpload() {
@@ -314,6 +339,19 @@ export default function RecipeForm() {
                                         </a>
                                     </p>
                                 )}
+
+                                <input
+                                    list='existing-recipes'
+                                    className={textAreaClass}
+                                    placeholder='Select existing recipe'
+                                    value={existingRecipeToImport}
+                                    onChange={(e) => setExistingRecipeToImport(e.target.value)}
+                                />
+                                <datalist id='existing-recipes'>
+                                    {existingRecipes?.map((recipe) => (
+                                        <option key={recipe} value={recipe} />
+                                    ))}
+                                </datalist>
                                 <button
                                     disabled={importing}
                                     className={`bg-${importing ? 'blue' : 'gray'}-300 hover:bg-${
