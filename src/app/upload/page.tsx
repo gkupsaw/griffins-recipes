@@ -64,7 +64,7 @@ export default function RecipeForm() {
         };
 
         if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
-            return console.error(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
+            return console.warn(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
         }
 
         const recipeDirName = recipeData.recipeName.replace(/[^a-zA-Z0-9]/g, '_');
@@ -82,7 +82,7 @@ export default function RecipeForm() {
             .catch(() => false);
 
         if (recipeDataExists && !window.confirm('Recipe already exists, would you like to overwrite it?')) {
-            return console.error(`Rejecting upload for existing recipe: recipeData=${JSON.stringify(recipeData)}`);
+            return console.warn(`Rejecting upload for existing recipe: recipeData=${JSON.stringify(recipeData)}`);
         }
 
         console.log('Uploading data...');
