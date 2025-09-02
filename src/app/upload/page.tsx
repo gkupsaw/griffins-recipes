@@ -10,7 +10,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
 type RecipeData = {
-    readonly recipeDate: Date;
+    readonly recipeDateMilliseconds: number;
     readonly recipeName: string;
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
@@ -56,7 +56,7 @@ export default function RecipeForm() {
 
     async function handleUpload() {
         const recipeData: RecipeData = {
-            recipeDate,
+            recipeDateMilliseconds: recipeDate.getTime(),
             recipeName,
             recipeDesc,
             recipeIngredients,
@@ -80,23 +80,9 @@ export default function RecipeForm() {
         })
             .then(() => true)
             .catch(() => false);
-        const recipeImageExists = await getUrl({
-            path: recipeImagePath,
-            options: { validateObjectExistence: true },
-        })
-            .then(() => true)
-            .catch(() => false);
 
-        if (
-            recipeDataExists &&
-            recipeImageExists &&
-            !window.confirm('Recipe already exists, would you like to overwrite it?')
-        ) {
-            return console.error(
-                `Rejecting upload for existing recipe: recipeData=${JSON.stringify(
-                    recipeData
-                )} recipeImageFile=${recipeImageFile}`
-            );
+        if (recipeDataExists && !window.confirm('Recipe already exists, would you like to overwrite it?')) {
+            return console.error(`Rejecting upload for existing recipe: recipeData=${JSON.stringify(recipeData)}`);
         }
 
         console.log('Uploading data...');
@@ -120,7 +106,7 @@ export default function RecipeForm() {
         <div className='font-sans grid items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20'>
             <Authenticator hideSignUp>
                 {({ signOut }) => (
-                    <form className='font-mono flex flex-col gap-[32px] row-start-2 sm:items-start'>
+                    <form className='font-mono flex flex-col gap-[32px] row-start-2'>
                         <div
                             id='Title'
                             className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'
@@ -163,10 +149,7 @@ export default function RecipeForm() {
                                 Upload photo
                             </label>
                         </div>
-                        <div
-                            id='Content'
-                            className='flex w-full flex-col gap-[8px] row-start-2 items-center sm:items-start'
-                        >
+                        <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
                             <p className='text-3xl text-center text-left'>Born on {recipeDate.toLocaleDateString()}</p>
                             <textarea
                                 value={recipeDesc}
@@ -175,10 +158,7 @@ export default function RecipeForm() {
                                 className={textAreaClass}
                             />
                             <hr />
-                            <div
-                                id='Ingredients'
-                                className='flex w-full flex-col gap-[2px] row-start-2 items-center sm:items-start'
-                            >
+                            <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
                                 <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-3xl text-center text-left'>Ingredients</p>
                                     <button
@@ -227,10 +207,7 @@ export default function RecipeForm() {
                                     ))}
                                 </ul>
                             </div>
-                            <div
-                                id='Steps'
-                                className='flex flex-col w-full gap-[2px] row-start-2 items-center sm:items-start'
-                            >
+                            <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                                 <div id='Steps title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-3xl text-center text-left'>Steps</p>
                                     <button

@@ -10,8 +10,8 @@ const gray = {
     secondary: 'bg-gray-500',
 };
 
-const listClass = 'w-full list-inside text-sm/6 text-center sm:text-left';
-const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
+const listClass = 'list-inside text-sm/6 text-center sm:text-left justify-items-center gap-[4px] flex flex-col';
+const textAreaClass = `text-sm/6 text-center justify-items-center ${gray.primary} p-2 my-1 rounded-sm`;
 
 export default function RecipePage() {
     const [recipes, setRecipes] = useState<string[] | null>(null);
@@ -46,23 +46,23 @@ export default function RecipePage() {
 
     return (
         <div className='font-sans grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20'>
-            <main className='flex flex-col gap-[32px] row-start-2 sm:items-start'>
+            <main className='flex flex-col row-start-2 justify-items-center'>
                 <div
                     id='Recipes'
-                    className='flex flex-col w-full gap-[2px] row-start-2 items-center sm:items-start text-center '
+                    className='flex flex-col w-full gap-[24px] row-start-2 justify-items-center text-center'
                 >
                     {loading ? (
                         [LOADING]
                     ) : (
                         <>
-                            <div id='Steps title' className='flex flex-row w-full items-stretch'>
-                                <p className='flex-grow text-3xl'>Recipes</p>
+                            <div id='Recipes title' className='flex flex-row w-full items-stretch'>
+                                <p className='flex-grow text-8xl'>Recipes</p>
                             </div>
                             <ul className={listClass}>
-                                {recipes.map((recipe, i) => (
+                                {recipes.map((recipe) => (
                                     <li key={recipe} className={textAreaClass}>
                                         <a
-                                            className='hover:underline hover:underline-offset-4 text-left w-full'
+                                            className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
                                             href={`recipe?recipename=${recipe}`}
                                             target='_blank'
                                             rel='noopener noreferrer'

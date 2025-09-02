@@ -3,13 +3,13 @@
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { downloadData } from 'aws-amplify/storage';
-import Image, { StaticImageData } from 'next/image';
+import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import defaultRecipeImage from '../img/default.png';
 
 type RecipeData = {
-    readonly recipeDate: Date;
+    readonly recipeDateMilliseconds: number;
     readonly recipeName: string;
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
@@ -45,10 +45,10 @@ export default function RecipePage() {
                     body
                         .text()
                         .then((text) => {
-                            const parsedRecipeData: RecipeData = JSON.parse(text);
+                            const parsedRecipeData = JSON.parse(text);
                             setRecipeData({
                                 ...parsedRecipeData,
-                                recipeDate: new Date(parsedRecipeData.recipeDate),
+                                recipeDate: new Date(Date.parse(parsedRecipeData.recipeDate)),
                             });
                         })
                         .catch((e) => window.alert(`Could not unpack recipe ${recipeDirName}: ${e}`))
@@ -75,7 +75,7 @@ export default function RecipePage() {
 
     return (
         <div className='font-mono grid items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
-            <main className='flex flex-col gap-[32px] row-start-2 justify-center sm:items-start'>
+            <main className='flex flex-col gap-[32px] row-start-2 justify-center'>
                 <div id='Title' className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'>
                     <p className='text-center pb-4'>{loading ? LOADING : recipeData.recipeName}</p>
                     {loading ? (
@@ -91,16 +91,13 @@ export default function RecipePage() {
                         />
                     )}
                 </div>
-                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center sm:items-start'>
+                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
                     <p className='text-3xl text-center text-left'>
-                        Born on {recipeData?.recipeDate?.toLocaleDateString() ?? LOADING}
+                        Born on {loading ? LOADING : new Date(recipeData.recipeDateMilliseconds).toLocaleDateString()}
                     </p>
                     <p className={textAreaClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
                     <hr />
-                    <div
-                        id='Ingredients'
-                        className='flex w-full flex-col gap-[2px] row-start-2 items-center sm:items-start'
-                    >
+                    <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
                         <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
                             <p className='flex-grow text-3xl text-center text-left'>Ingredients</p>
                         </div>
@@ -112,7 +109,7 @@ export default function RecipePage() {
                             ))}
                         </ul>
                     </div>
-                    <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center sm:items-start'>
+                    <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                         <div id='Steps title' className='flex flex-row w-full items-stretch'>
                             <p className='flex-grow text-3xl text-center text-left'>Steps</p>
                         </div>
