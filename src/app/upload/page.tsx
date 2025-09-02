@@ -346,6 +346,7 @@ export default function RecipeForm() {
                                     placeholder='Select existing recipe'
                                     value={existingRecipeToImport}
                                     onChange={(e) => setExistingRecipeToImport(e.target.value)}
+                                    disabled={importing}
                                 />
                                 <datalist id='existing-recipes'>
                                     {existingRecipes?.map((recipe) => (
@@ -355,7 +356,7 @@ export default function RecipeForm() {
                                 <button
                                     disabled={importing}
                                     className={`bg-${importing ? 'blue' : 'gray'}-300 hover:bg-${
-                                        submitting ? 'blue' : 'gray'
+                                        importing ? 'blue' : 'gray'
                                     }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
@@ -370,10 +371,11 @@ export default function RecipeForm() {
                                         await handleImport();
 
                                         console.log('Upload import complete');
+                                        setExistingRecipeToImport('');
                                         setImporting(false);
                                     }}
                                 >
-                                    {submitting ? 'Importing...' : 'Import existing'}
+                                    {importing ? 'Importing...' : 'Import existing'}
                                 </button>
                                 <button
                                     disabled={submitting}
