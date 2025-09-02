@@ -2,6 +2,7 @@
 
 import { Authenticator } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
@@ -319,6 +320,14 @@ export default function RecipeForm() {
             <footer className='row-start-3 flex gap-[24px] flex-row flex-wrap items-center justify-center'>
                 <a className='flex items-center gap-2 hover:underline hover:underline-offset-4' href='/'>
                     Home
+                </a>
+                <a
+                    className='flex items-center gap-2 hover:underline hover:underline-offset-4 text-3xl'
+                    href='https://github.com/gkupsaw/griffins-recipes'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                >
+                    <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
                     className='flex items-center gap-2 hover:underline hover:underline-offset-4'

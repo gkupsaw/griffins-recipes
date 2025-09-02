@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import defaultRecipeImage from '../img/default.png';
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
 
 type RecipeData = {
     readonly recipeDateMilliseconds: number;
@@ -126,6 +127,14 @@ export default function RecipePage() {
             <footer className='row-start-3 flex gap-[24px] flex-row flex-wrap items-center justify-center pt-8'>
                 <a className='flex items-center gap-2 hover:underline hover:underline-offset-4' href='/'>
                     Home
+                </a>
+                <a
+                    className='flex items-center gap-2 hover:underline hover:underline-offset-4 text-3xl'
+                    href='https://github.com/gkupsaw/griffins-recipes'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                >
+                    <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
                     className='flex items-center gap-2 hover:underline hover:underline-offset-4'

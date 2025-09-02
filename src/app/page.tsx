@@ -1,5 +1,7 @@
 'use client';
 
+import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { list } from 'aws-amplify/storage';
 import { useEffect, useState } from 'react';
 
@@ -77,6 +79,14 @@ export default function RecipePage() {
                 </div>
             </main>
             <footer className='row-start-3 flex gap-[24px] flex-wrap items-center justify-center'>
+                <a
+                    className='flex items-center gap-2 hover:underline hover:underline-offset-4 text-3xl'
+                    href='https://github.com/gkupsaw/griffins-recipes'
+                    target='_blank'
+                    rel='noopener noreferrer'
+                >
+                    <FontAwesomeIcon icon={faGithub} />
+                </a>
                 <a
                     className='flex items-center gap-2 hover:underline hover:underline-offset-4'
                     href='https://www.griffinkupsaw.com/'
