@@ -5,7 +5,7 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 -   AWS amplify powers all backend resources: https://docs.amplify.aws/react/start/
     -   Cognito Auth: https://docs.amplify.aws/react/build-a-backend/auth/
     -   S3 Storage: https://docs.amplify.aws/react/build-a-backend/storage/
--   GitHub pages hosts the frontend site, deployed with GitHub actions
+-   GitHub pages hosts the frontend site, deployed automatically with GitHub actions. A simple push to this repo triggers a new deployment, and the site is up and ready in minutes.
 
     -   This requires AWS credentials to generate the Amplify outputs (the `Build with Amplify` step), configured with the offical AWS action https://github.com/aws-actions/configure-aws-credentials. Quoting for posterity:
 
