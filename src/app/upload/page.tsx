@@ -218,7 +218,20 @@ export default function RecipeForm() {
                             </label>
                         </div>
                         <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
-                            <p className='text-3xl text-center text-left'>Born on {recipeDate.toLocaleDateString()}</p>
+                            <div className='flex flex-row text-sm/6 text-center text-left gap-[16px]'>
+                                <p className='text-3xl text-center text-left'>
+                                    Born on {recipeDate.toLocaleDateString()}
+                                </p>
+                                <button
+                                    className={buttonClass}
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        setRecipeDate(new Date());
+                                    }}
+                                >
+                                    Reset
+                                </button>
+                            </div>
                             <textarea
                                 value={recipeDesc}
                                 placeholder='Recipe description'
