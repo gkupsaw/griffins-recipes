@@ -6,7 +6,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import { getUrl, uploadData } from 'aws-amplify/storage';
+import { downloadData, getUrl, uploadData } from 'aws-amplify/storage';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -31,9 +31,10 @@ const defaultIngredientsCount = 5;
 const defaultStepsCount = 5;
 
 export default function RecipeForm() {
-    const recipeDate = new Date();
+    const [recipeDate, setRecipeDate] = useState(new Date());
 
     const [submitting, setSubmitting] = useState(false);
+    const [importing, setImporting] = useState(false);
 
     const [user, setUser] = useState<AuthUser | null>(null);
 
@@ -56,6 +57,37 @@ export default function RecipeForm() {
                 console.log(`Could not retrieve current user: ${e}`);
             });
     }, []);
+
+    async function handleImport() {
+        const importedRecipeName = window.prompt('Input recipe name');
+
+        await downloadData({ path: `recipe-data/${importedRecipeName}/data.json` })
+            .result.then(({ body }) =>
+                body
+                    .text()
+                    .then((text) => {
+                        const parsedRecipeData = JSON.parse(text);
+                        setRecipeName(parsedRecipeData.recipeName);
+                        setRecipeDate(new Date(parsedRecipeData.recipeDate));
+                        setRecipeDesc(parsedRecipeData.recipeDesc);
+                        setIngredients(parsedRecipeData.recipeIngredients);
+                        setSteps(parsedRecipeData.recipeSteps);
+                    })
+                    .catch((e) => window.alert(`Could not unpack recipe ${importedRecipeName}: ${e}`))
+            )
+            .catch((e) => window.alert(`Could not retrieve recipe ${importedRecipeName}: ${e}`));
+
+        await downloadData({ path: `recipe-data/${importedRecipeName}/image.png` })
+            .result.then(({ body }) =>
+                body
+                    .blob()
+                    .then((blob) => {
+                        setRecipeImageFile(new File([blob], 'image.png'));
+                    })
+                    .catch((e) => window.alert(`Could not unpack image for recipe ${importedRecipeName}: ${e}`))
+            )
+            .catch((e) => window.alert(`Could not retrieve image for recipe ${importedRecipeName}: ${e}`));
+    }
 
     async function handleUpload() {
         const recipeData: RecipeData = {
@@ -278,6 +310,29 @@ export default function RecipeForm() {
                                         </a>
                                     </p>
                                 )}
+                                <button
+                                    disabled={importing}
+                                    className={`bg-${importing ? 'blue' : 'gray'}-300 hover:bg-${
+                                        submitting ? 'blue' : 'gray'
+                                    }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+
+                                        if (importing) {
+                                            return console.warn('Import in progress');
+                                        }
+
+                                        console.log('Starting import workflow...');
+                                        setImporting(true);
+
+                                        await handleImport();
+
+                                        console.log('Upload import complete');
+                                        setImporting(false);
+                                    }}
+                                >
+                                    {submitting ? 'Importing...' : 'Import existing'}
+                                </button>
                                 <button
                                     disabled={submitting}
                                     className={`bg-${submitting ? 'blue' : 'gray'}-300 hover:bg-${
