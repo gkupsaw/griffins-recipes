@@ -23,7 +23,7 @@ const gray = {
 };
 
 const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text-left';
-const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
+const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
 
 const LOADING = 'Loading...';
 
@@ -96,7 +96,7 @@ export default function RecipePage() {
                     <p className='text-3xl text-center text-left'>
                         Born on {loading ? LOADING : new Date(recipeData.recipeDateMilliseconds).toLocaleDateString()}
                     </p>
-                    <p className={textAreaClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
+                    <p className={inputClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
                     <hr />
                     <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
                         <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
@@ -104,7 +104,7 @@ export default function RecipePage() {
                         </div>
                         <ul className={listClass}>
                             {(loading ? [LOADING] : recipeData.recipeIngredients).map((ingredient, i) => (
-                                <li key={i} className={textAreaClass}>
+                                <li key={i} className={inputClass}>
                                     {ingredient}
                                 </li>
                             ))}
@@ -116,7 +116,7 @@ export default function RecipePage() {
                         </div>
                         <ul className={listClass}>
                             {(loading ? [LOADING] : recipeData.recipeSteps).map((step, i) => (
-                                <li key={i} className={textAreaClass}>
+                                <li key={i} className={inputClass}>
                                     {step}
                                 </li>
                             ))}

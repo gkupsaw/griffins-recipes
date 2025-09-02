@@ -13,7 +13,7 @@ const gray = {
 };
 
 const listClass = 'list-inside text-sm/6 text-center sm:text-left justify-items-center gap-[4px] flex flex-col';
-const textAreaClass = `text-sm/6 text-center justify-items-center ${gray.primary} p-2 my-1 rounded-sm`;
+const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p-2 my-1 rounded-sm`;
 
 export default function RecipePage() {
     const [recipes, setRecipes] = useState<string[] | null>(null);
@@ -62,7 +62,7 @@ export default function RecipePage() {
                             </div>
                             <ul className={listClass}>
                                 {recipes.map((recipe) => (
-                                    <li key={recipe} className={textAreaClass}>
+                                    <li key={recipe} className={inputClass}>
                                         <a
                                             className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
                                             href={`recipe?recipename=${recipe}`}

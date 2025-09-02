@@ -25,7 +25,7 @@ const gray = {
 
 const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text-left';
 const buttonClass = `my-2 hover:${gray.secondary} text-white px-2 rounded-xs transition duration-300 ease-in-out`;
-const textAreaClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
+const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
 
 const defaultIngredientsCount = 5;
 const defaultStepsCount = 5;
@@ -95,9 +95,9 @@ export default function RecipeForm() {
                 body
                     .text()
                     .then((text) => {
-                        const parsedRecipeData = JSON.parse(text);
+                        const parsedRecipeData: RecipeData = JSON.parse(text);
                         setRecipeName(parsedRecipeData.recipeName);
-                        setRecipeDate(new Date(parsedRecipeData.recipeDate));
+                        setRecipeDate(new Date(parsedRecipeData.recipeDateMilliseconds));
                         setRecipeDesc(parsedRecipeData.recipeDesc);
                         setIngredients(parsedRecipeData.recipeIngredients);
                         setSteps(parsedRecipeData.recipeSteps);
@@ -115,7 +115,7 @@ export default function RecipeForm() {
                     })
                     .catch((e) => window.alert(`Could not unpack image for recipe ${existingRecipeToImport}: ${e}`))
             )
-            .catch((e) => window.alert(`Could not retrieve image for recipe ${existingRecipeToImport}: ${e}`));
+            .catch(() => setRecipeImageFile(null));
     }
 
     async function handleUpload() {
@@ -223,7 +223,7 @@ export default function RecipeForm() {
                                 value={recipeDesc}
                                 placeholder='Recipe description'
                                 onChange={(e) => setRecipeDesc(e.target.value)}
-                                className={textAreaClass}
+                                className={inputClass}
                             />
                             <hr />
                             <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
@@ -248,7 +248,7 @@ export default function RecipeForm() {
                                             <textarea
                                                 value={ingredient}
                                                 placeholder={`Ingredient ${i + 1}`}
-                                                className={textAreaClass}
+                                                className={inputClass}
                                                 onChange={(e) =>
                                                     setIngredients([
                                                         ...recipeIngredients.slice(0, i),
@@ -294,7 +294,7 @@ export default function RecipeForm() {
                                             <textarea
                                                 value={ingredient}
                                                 placeholder={`Step ${i + 1}`}
-                                                className={textAreaClass}
+                                                className={inputClass}
                                                 onChange={(e) =>
                                                     setSteps([
                                                         ...recipeSteps.slice(0, i),
@@ -321,6 +321,48 @@ export default function RecipeForm() {
                                     ))}
                                 </ul>
                             </div>
+                            <div id='Import' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
+                                <div id='Import title' className='flex flex-row w-full items-stretch'>
+                                    <p className='flex-grow text-3xl text-center text-left'>Import existing recipe</p>
+                                </div>
+                                <div className='flex flex-row w-full text-sm/6 text-center text-left'>
+                                    <input
+                                        list='existing-recipes'
+                                        className={inputClass}
+                                        placeholder='Select existing recipe'
+                                        value={existingRecipeToImport}
+                                        onChange={(e) => setExistingRecipeToImport(e.target.value)}
+                                        disabled={importing}
+                                    />
+                                    <datalist id='existing-recipes'>
+                                        {existingRecipes?.map((recipe) => (
+                                            <option key={recipe} value={recipe} />
+                                        ))}
+                                    </datalist>
+                                    <button
+                                        disabled={importing}
+                                        className={buttonClass}
+                                        onClick={async (e) => {
+                                            e.preventDefault();
+
+                                            if (importing) {
+                                                return console.warn('Import in progress');
+                                            }
+
+                                            console.log('Starting import workflow...');
+                                            setImporting(true);
+
+                                            await handleImport();
+
+                                            console.log('Upload import complete');
+                                            setExistingRecipeToImport('');
+                                            setImporting(false);
+                                        }}
+                                    >
+                                        {importing ? 'Importing...' : 'Import'}
+                                    </button>
+                                </div>
+                            </div>
 
                             <div
                                 id='Upload'
@@ -339,44 +381,6 @@ export default function RecipeForm() {
                                         </a>
                                     </p>
                                 )}
-
-                                <input
-                                    list='existing-recipes'
-                                    className={textAreaClass}
-                                    placeholder='Select existing recipe'
-                                    value={existingRecipeToImport}
-                                    onChange={(e) => setExistingRecipeToImport(e.target.value)}
-                                    disabled={importing}
-                                />
-                                <datalist id='existing-recipes'>
-                                    {existingRecipes?.map((recipe) => (
-                                        <option key={recipe} value={recipe} />
-                                    ))}
-                                </datalist>
-                                <button
-                                    disabled={importing}
-                                    className={`bg-${importing ? 'blue' : 'gray'}-300 hover:bg-${
-                                        importing ? 'blue' : 'gray'
-                                    }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
-                                    onClick={async (e) => {
-                                        e.preventDefault();
-
-                                        if (importing) {
-                                            return console.warn('Import in progress');
-                                        }
-
-                                        console.log('Starting import workflow...');
-                                        setImporting(true);
-
-                                        await handleImport();
-
-                                        console.log('Upload import complete');
-                                        setExistingRecipeToImport('');
-                                        setImporting(false);
-                                    }}
-                                >
-                                    {importing ? 'Importing...' : 'Import existing'}
-                                </button>
                                 <button
                                     disabled={submitting}
                                     className={`bg-${submitting ? 'blue' : 'gray'}-300 hover:bg-${
