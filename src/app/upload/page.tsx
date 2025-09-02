@@ -7,6 +7,7 @@ import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
 import { downloadData, getUrl, list, uploadData } from 'aws-amplify/storage';
+import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
@@ -416,6 +417,58 @@ export default function RecipeForm() {
                                     }}
                                 >
                                     {submitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                                <button
+                                    className='bg-yellow-300 hover:bg-yellow-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+                                        if (window.confirm('Download ALL recipes? This will take a while.')) {
+                                            console.log(`Listing all data...`);
+
+                                            const allFiles = await list({
+                                                path: 'recipe-data/',
+                                                options: { listAll: true },
+                                            });
+
+                                            const allResults = await Promise.all(
+                                                allFiles.items.map(async (item) => {
+                                                    console.log(`Downloading ${item.path}...`);
+                                                    const data = await downloadData({ path: item.path }).result;
+                                                    console.log(`Downloaded ${item.path}`);
+                                                    return data;
+                                                })
+                                            );
+
+                                            console.log(`Processing all data...`);
+
+                                            const zip = new JSZip();
+
+                                            await Promise.all(
+                                                allResults.map(async (result) => {
+                                                    console.log(`Processing ${result.path}...`);
+                                                    const blob = await result.body.blob();
+                                                    console.log(`Processed ${result.path}`);
+                                                    zip.file(result.path, blob);
+                                                })
+                                            );
+
+                                            console.log('Zipping results...');
+
+                                            const zipBlob = await zip.generateAsync({ type: 'blob' });
+
+                                            console.log('Attempting download...');
+
+                                            const link = document.createElement('a');
+                                            link.href = URL.createObjectURL(zipBlob);
+                                            link.download = `griffins_recipes_${new Date().getTime()}`;
+                                            link.click();
+                                            URL.revokeObjectURL(link.href);
+
+                                            console.log('Download complete');
+                                        }
+                                    }}
+                                >
+                                    Download All
                                 </button>
                                 <button
                                     className='bg-red-300 hover:bg-red-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
