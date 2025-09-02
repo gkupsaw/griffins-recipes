@@ -61,6 +61,10 @@ export default function RecipeForm() {
     async function handleImport() {
         const importedRecipeName = window.prompt('Input recipe name');
 
+        if (!importedRecipeName) {
+            return window.alert('No recipe name provided');
+        }
+
         await downloadData({ path: `recipe-data/${importedRecipeName}/data.json` })
             .result.then(({ body }) =>
                 body
