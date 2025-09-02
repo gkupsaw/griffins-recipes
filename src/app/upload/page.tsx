@@ -132,7 +132,7 @@ export default function RecipeForm() {
             return console.warn(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
         }
 
-        const recipeDirName = recipeData.recipeName.replace(/[^a-zA-Z0-9]/g, '_');
+        const recipeDirName = recipeData.recipeName;
         const directory = `recipe-data/${recipeDirName}`;
         const recipeDataPath = `${directory}/data.json`;
         const recipeImagePath = `${directory}/image.png`;
