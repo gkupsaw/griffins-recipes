@@ -64,6 +64,7 @@ export default function RecipeForm() {
         };
 
         if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
+            window.alert('Invalid input, all fields must be filled');
             return console.warn(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
         }
 
