@@ -52,6 +52,18 @@ export default function RecipeForm() {
     const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
     useEffect(() => {
+        const inProgressRecipe = localStorage.getItem('in-progress-recipe');
+        if (inProgressRecipe !== null) {
+            console.log(`In progress recipe data found: ${inProgressRecipe}`);
+            const inProgressRecipeData: RecipeData = JSON.parse(inProgressRecipe);
+            if (inProgressRecipeData.recipeName) setRecipeName(inProgressRecipeData.recipeName);
+            if (inProgressRecipeData.recipeDesc) setRecipeDesc(inProgressRecipeData.recipeDesc);
+            if (inProgressRecipeData.recipeDateMilliseconds)
+                setRecipeDate(new Date(inProgressRecipeData.recipeDateMilliseconds));
+            if (inProgressRecipeData.recipeIngredients) setIngredients(inProgressRecipeData.recipeIngredients);
+            if (inProgressRecipeData.recipeSteps) setSteps(inProgressRecipeData.recipeSteps);
+        }
+
         getCurrentUser()
             .then((currentUser) => {
                 setUser(currentUser);
@@ -85,6 +97,20 @@ export default function RecipeForm() {
 
         loadExistingRecipes();
     }, []);
+
+    useEffect(() => {
+        const recipeData: RecipeData = {
+            recipeDateMilliseconds: recipeDate.getTime(),
+            recipeName,
+            recipeDesc,
+            recipeIngredients,
+            recipeSteps,
+        };
+
+        console.log('Saving recipe data to local storage');
+
+        localStorage.setItem('in-progress-recipe', JSON.stringify(recipeData));
+    }, [recipeDate, recipeName, recipeDesc, recipeIngredients, recipeSteps]);
 
     async function handleImport() {
         if (!existingRecipeToImport) {
@@ -411,6 +437,8 @@ export default function RecipeForm() {
                                         setSubmitting(true);
 
                                         await handleUpload();
+
+                                        localStorage.removeItem('in-progress-recipe');
 
                                         console.log('Upload workflow complete');
                                         setSubmitting(false);
