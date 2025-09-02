@@ -43,6 +43,8 @@ export default function RecipeForm() {
     const [recipeIngredients, setIngredients] = useState(new Array(defaultIngredientsCount).fill(''));
     const [recipeSteps, setSteps] = useState(new Array(defaultStepsCount).fill(''));
 
+    const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
+
     useEffect(() => {
         getCurrentUser()
             .then((currentUser) => {
@@ -101,6 +103,9 @@ export default function RecipeForm() {
                 data: recipeImageFile,
             });
         }
+
+        const uploadedRecipeUrl = window.location.href.split('upload')[0] + 'recipe?recipename=' + recipeDirName;
+        setRecipeUrl(uploadedRecipeUrl);
     }
 
     return (
@@ -259,6 +264,19 @@ export default function RecipeForm() {
                                 id='Upload'
                                 className='flex flex-col w-full gap-[16px] justify-center items-center mt-4'
                             >
+                                {recipeUrl && (
+                                    <p className='flex-grow text-xl text-center text-green-500 font-bold'>
+                                        Upload complete!! :) Your recipe is available at{' '}
+                                        <a
+                                            className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                                            href={recipeUrl}
+                                            target='_blank'
+                                            rel='noopener noreferrer'
+                                        >
+                                            {recipeUrl}
+                                        </a>
+                                    </p>
+                                )}
                                 <button
                                     disabled={submitting}
                                     className={`bg-${submitting ? 'blue' : 'gray'}-300 hover:bg-${
