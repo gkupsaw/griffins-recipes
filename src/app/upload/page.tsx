@@ -318,7 +318,10 @@ export default function RecipeForm() {
                 )}
             </Authenticator>
             <footer className='row-start-3 flex gap-[24px] flex-row flex-wrap items-center justify-center'>
-                <a className='flex items-center gap-2 hover:underline hover:underline-offset-4' href='/'>
+                <a
+                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    href='https://www.griffinkupsaw.com/griffins-recipes'
+                >
                     Home
                 </a>
                 <a
