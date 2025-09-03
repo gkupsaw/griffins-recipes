@@ -100,6 +100,10 @@ export default function RecipeForm() {
             const recipeDirName = searchParams.get('recipename');
             const topLevelFolder = searchParams.get('private') === 'true' ? 'private-recipe-data' : 'recipe-data';
 
+            if (recipeDirName === null) {
+                return console.log('No recipe params in URL');
+            }
+
             console.log('Found recipe params in URL, attempting download');
 
             await downloadData({ path: `${topLevelFolder}/${recipeDirName}/data.json` })
