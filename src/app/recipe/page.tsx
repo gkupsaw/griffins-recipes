@@ -8,6 +8,7 @@ import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import defaultRecipeImage from '../img/default.png';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
+import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
 
 type RecipeData = {
     readonly recipeDateMilliseconds: number;
@@ -32,6 +33,7 @@ export default function RecipePage() {
     const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
     const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
     const [recipeImageNotFound, setRecipeImageNotFound] = useState<boolean>(false);
+    const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
         async function loadData() {
@@ -73,6 +75,16 @@ export default function RecipePage() {
         }
 
         loadData();
+
+        (async () => {
+            try {
+                setUser(await getCurrentUser());
+                console.log('Signed in');
+            } catch (e) {
+                console.log(`Could not retrieve current user: ${e}`);
+                return;
+            }
+        })();
     }, []);
 
     const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
@@ -125,7 +137,7 @@ export default function RecipePage() {
                             ))}
                         </ul>
                     </div>
-                    {recipeData && (
+                    {recipeData && user?.signInDetails && (
                         <a
                             className='flex-1 hover:underline hover:underline-offset-4 text-center'
                             href={`upload?recipename=${recipeData.recipeName}&private=${recipeData.isPrivate}`}
