@@ -16,6 +16,7 @@ type RecipeData = {
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
     readonly recipeSteps: string[];
+    readonly isPrivate: boolean;
 };
 
 const getDefaultRecipeData = (): RecipeData => ({
@@ -24,6 +25,7 @@ const getDefaultRecipeData = (): RecipeData => ({
     recipeDateMilliseconds: new Date().getTime(),
     recipeIngredients: new Array(defaultIngredientsCount).fill(''),
     recipeSteps: new Array(defaultStepsCount).fill(''),
+    isPrivate: false,
 });
 
 const gray = {
@@ -49,9 +51,7 @@ export default function RecipeForm() {
 
     const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
     const [recipeState, setRecipeState] = useState<RecipeData>(getDefaultRecipeData());
-    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps } = recipeState;
-
-    const [isRecipePrivate, setIsRecipePrivate] = useState(false);
+    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps, isPrivate } = recipeState;
 
     const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
@@ -66,6 +66,7 @@ export default function RecipeForm() {
                 recipeDateMilliseconds: inProgressRecipeData.recipeDateMilliseconds ?? recipeDateMilliseconds,
                 recipeIngredients: inProgressRecipeData.recipeIngredients ?? recipeIngredients,
                 recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
+                isPrivate: inProgressRecipeData.isPrivate ?? isPrivate,
             });
         }
 
@@ -431,6 +432,23 @@ export default function RecipeForm() {
                                         </a>
                                     </p>
                                 )}
+                                <div id='Import title' className='flex flex-row items-center gap-4'>
+                                    <label htmlFor='isPrivate' className='text-2xl'>
+                                        Mark recipe private?
+                                    </label>
+                                    <input
+                                        id='isPrivate'
+                                        type='checkbox'
+                                        className='pb-4 wrap-break-word cursor-pointer'
+                                        style={{
+                                            width: '1.5em',
+                                            height: '1.5em',
+                                        }}
+                                        onChange={(e) =>
+                                            setRecipeState({ ...recipeState, isPrivate: e.target.checked })
+                                        }
+                                    />
+                                </div>
                                 <button
                                     disabled={submitting}
                                     className={`bg-${submitting ? 'blue' : 'green'}-300 hover:bg-${

@@ -2,6 +2,7 @@
 
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
 import { list } from 'aws-amplify/storage';
 import { useEffect, useState } from 'react';
 
@@ -17,6 +18,7 @@ const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p
 
 export default function RecipePage() {
     const [recipes, setRecipes] = useState<string[] | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
         async function loadData() {
@@ -42,6 +44,15 @@ export default function RecipePage() {
         }
 
         loadData();
+
+        getCurrentUser()
+            .then((currentUser) => {
+                setUser(currentUser);
+                console.log('Signed in');
+            })
+            .catch((e) => {
+                console.log(`Could not retrieve current user: ${e}`);
+            });
     }, []);
 
     const loading = recipes === null;
