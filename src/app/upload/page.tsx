@@ -146,11 +146,12 @@ export default function RecipeForm() {
                 ...(await loadExistingRecipes('private-recipe-data')),
             ]);
 
+            await loadRecipeIfInUrl();
+
             const inProgressRecipe = localStorage.getItem('in-progress-recipe');
             if (inProgressRecipe !== null) {
-                loadSessionRecipe(inProgressRecipe);
+                await loadSessionRecipe(inProgressRecipe);
             }
-            loadRecipeIfInUrl();
         })();
     }, []);
 
