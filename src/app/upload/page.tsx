@@ -18,6 +18,14 @@ type RecipeData = {
     readonly recipeSteps: string[];
 };
 
+const getDefaultRecipeData = (): RecipeData => ({
+    recipeName: '',
+    recipeDesc: '',
+    recipeDateMilliseconds: new Date().getTime(),
+    recipeIngredients: new Array(defaultIngredientsCount).fill(''),
+    recipeSteps: new Array(defaultStepsCount).fill(''),
+});
+
 const gray = {
     primary: 'bg-gray-800',
     secondary: 'bg-gray-500',
@@ -31,8 +39,6 @@ const defaultIngredientsCount = 5;
 const defaultStepsCount = 5;
 
 export default function RecipeForm() {
-    const [recipeDate, setRecipeDate] = useState(new Date());
-
     const [submitting, setSubmitting] = useState(false);
     const [importing, setImporting] = useState(false);
 
@@ -41,12 +47,11 @@ export default function RecipeForm() {
 
     const [user, setUser] = useState<AuthUser | null>(null);
 
-    const [recipeName, setRecipeName] = useState('');
-    const [recipeDesc, setRecipeDesc] = useState('');
     const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
+    const [recipeState, setRecipeState] = useState<RecipeData>(getDefaultRecipeData());
+    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps } = recipeState;
 
-    const [recipeIngredients, setIngredients] = useState(new Array(defaultIngredientsCount).fill(''));
-    const [recipeSteps, setSteps] = useState(new Array(defaultStepsCount).fill(''));
+    const [isRecipePrivate, setIsRecipePrivate] = useState(false);
 
     const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
@@ -55,12 +60,13 @@ export default function RecipeForm() {
         if (inProgressRecipe !== null) {
             console.log(`In progress recipe data found: ${inProgressRecipe}`);
             const inProgressRecipeData: RecipeData = JSON.parse(inProgressRecipe);
-            if (inProgressRecipeData.recipeName) setRecipeName(inProgressRecipeData.recipeName);
-            if (inProgressRecipeData.recipeDesc) setRecipeDesc(inProgressRecipeData.recipeDesc);
-            if (inProgressRecipeData.recipeDateMilliseconds)
-                setRecipeDate(new Date(inProgressRecipeData.recipeDateMilliseconds));
-            if (inProgressRecipeData.recipeIngredients) setIngredients(inProgressRecipeData.recipeIngredients);
-            if (inProgressRecipeData.recipeSteps) setSteps(inProgressRecipeData.recipeSteps);
+            setRecipeState({
+                recipeName: inProgressRecipeData.recipeName ?? recipeName,
+                recipeDesc: inProgressRecipeData.recipeDesc ?? recipeDesc,
+                recipeDateMilliseconds: inProgressRecipeData.recipeDateMilliseconds ?? recipeDateMilliseconds,
+                recipeIngredients: inProgressRecipeData.recipeIngredients ?? recipeIngredients,
+                recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
+            });
         }
 
         getCurrentUser()
@@ -98,18 +104,10 @@ export default function RecipeForm() {
     }, []);
 
     useEffect(() => {
-        const recipeData: RecipeData = {
-            recipeDateMilliseconds: recipeDate.getTime(),
-            recipeName,
-            recipeDesc,
-            recipeIngredients,
-            recipeSteps,
-        };
-
         console.log('Saving recipe data to local storage');
 
-        localStorage.setItem('in-progress-recipe', JSON.stringify(recipeData));
-    }, [recipeDate, recipeName, recipeDesc, recipeIngredients, recipeSteps]);
+        localStorage.setItem('in-progress-recipe', JSON.stringify(recipeState));
+    }, [recipeState]);
 
     async function handleImport() {
         if (!existingRecipeToImport) {
@@ -122,11 +120,7 @@ export default function RecipeForm() {
                     .text()
                     .then((text) => {
                         const parsedRecipeData: RecipeData = JSON.parse(text);
-                        setRecipeName(parsedRecipeData.recipeName);
-                        setRecipeDate(new Date(parsedRecipeData.recipeDateMilliseconds));
-                        setRecipeDesc(parsedRecipeData.recipeDesc);
-                        setIngredients(parsedRecipeData.recipeIngredients);
-                        setSteps(parsedRecipeData.recipeSteps);
+                        setRecipeState(parsedRecipeData);
                     })
                     .catch((e) => window.alert(`Could not unpack recipe ${existingRecipeToImport}: ${e}`))
             )
@@ -145,20 +139,12 @@ export default function RecipeForm() {
     }
 
     async function handleUpload() {
-        const recipeData: RecipeData = {
-            recipeDateMilliseconds: recipeDate.getTime(),
-            recipeName,
-            recipeDesc,
-            recipeIngredients,
-            recipeSteps,
-        };
-
         if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
             window.alert('Invalid input, all fields must be filled');
-            return console.warn(`Invalid input: recipeData=${JSON.stringify(recipeData)}`);
+            return console.warn(`Invalid input: recipeState=${JSON.stringify(recipeState)}`);
         }
 
-        const recipeDirName = recipeData.recipeName;
+        const recipeDirName = recipeName;
         const directory = `recipe-data/${recipeDirName}`;
         const recipeDataPath = `${directory}/data.json`;
         const recipeImagePath = `${directory}/image.png`;
@@ -173,14 +159,14 @@ export default function RecipeForm() {
             .catch(() => false);
 
         if (recipeDataExists && !window.confirm('Recipe already exists, would you like to overwrite it?')) {
-            return console.warn(`Rejecting upload for existing recipe: recipeData=${JSON.stringify(recipeData)}`);
+            return console.warn(`Rejecting upload for existing recipe: recipeState=${JSON.stringify(recipeState)}`);
         }
 
         console.log('Uploading data...');
 
         uploadData({
             path: recipeDataPath,
-            data: JSON.stringify(recipeData),
+            data: JSON.stringify(recipeState),
         });
 
         if (recipeImageFile !== null) {
@@ -208,7 +194,7 @@ export default function RecipeForm() {
                             <textarea
                                 value={recipeName}
                                 placeholder='Recipe name'
-                                onChange={(e) => setRecipeName(e.target.value)}
+                                onChange={(e) => setRecipeState({ ...recipeState, recipeName: e.target.value })}
                                 className='text-center pb-4 w-full max-w-full wrap-break-word'
                             />
                             {recipeImageFile ? (
@@ -247,13 +233,16 @@ export default function RecipeForm() {
                             <div id='Date' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
                                 <div id='Date title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-xl md:text-3xl text-center text-left'>
-                                        Born on {recipeDate.toLocaleDateString()}
+                                        Born on {new Date(recipeDateMilliseconds).toLocaleDateString()}
                                     </p>
                                     <button
                                         className={buttonClass}
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setRecipeDate(new Date());
+                                            setRecipeState({
+                                                ...recipeState,
+                                                recipeDateMilliseconds: new Date().getTime(),
+                                            });
                                         }}
                                     >
                                         Reset
@@ -262,7 +251,7 @@ export default function RecipeForm() {
                                 <textarea
                                     value={recipeDesc}
                                     placeholder='Recipe description'
-                                    onChange={(e) => setRecipeDesc(e.target.value)}
+                                    onChange={(e) => setRecipeState({ ...recipeState, recipeDesc: e.target.value })}
                                     className={inputClass}
                                 />
                             </div>
@@ -274,7 +263,10 @@ export default function RecipeForm() {
                                         className={buttonClass}
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setIngredients([...recipeIngredients, '']);
+                                            setRecipeState({
+                                                ...recipeState,
+                                                recipeIngredients: [...recipeIngredients, ''],
+                                            });
                                         }}
                                     >
                                         Add ingredient
@@ -291,11 +283,14 @@ export default function RecipeForm() {
                                                 placeholder={`Ingredient ${i + 1}`}
                                                 className={inputClass}
                                                 onChange={(e) =>
-                                                    setIngredients([
-                                                        ...recipeIngredients.slice(0, i),
-                                                        e.target.value,
-                                                        ...recipeIngredients.slice(i + 1),
-                                                    ])
+                                                    setRecipeState({
+                                                        ...recipeState,
+                                                        recipeIngredients: [
+                                                            ...recipeIngredients.slice(0, i),
+                                                            e.target.value,
+                                                            ...recipeIngredients.slice(i + 1),
+                                                        ],
+                                                    })
                                                 }
                                             />
                                             {recipeIngredients.length > 1 && (
@@ -303,10 +298,13 @@ export default function RecipeForm() {
                                                     className={buttonClass}
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        setIngredients([
-                                                            ...recipeIngredients.slice(0, i),
-                                                            ...recipeIngredients.slice(i + 1),
-                                                        ]);
+                                                        setRecipeState({
+                                                            ...recipeState,
+                                                            recipeIngredients: [
+                                                                ...recipeIngredients.slice(0, i),
+                                                                ...recipeIngredients.slice(i + 1),
+                                                            ],
+                                                        });
                                                     }}
                                                 >
                                                     Remove
@@ -323,7 +321,10 @@ export default function RecipeForm() {
                                         className={buttonClass}
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            setSteps([...recipeSteps, '']);
+                                            setRecipeState({
+                                                ...recipeState,
+                                                recipeSteps: [...recipeSteps, ''],
+                                            });
                                         }}
                                     >
                                         Add step
@@ -337,11 +338,14 @@ export default function RecipeForm() {
                                                 placeholder={`Step ${i + 1}`}
                                                 className={inputClass}
                                                 onChange={(e) =>
-                                                    setSteps([
-                                                        ...recipeSteps.slice(0, i),
-                                                        e.target.value,
-                                                        ...recipeSteps.slice(i + 1),
-                                                    ])
+                                                    setRecipeState({
+                                                        ...recipeState,
+                                                        recipeSteps: [
+                                                            ...recipeSteps.slice(0, i),
+                                                            e.target.value,
+                                                            ...recipeSteps.slice(i + 1),
+                                                        ],
+                                                    })
                                                 }
                                             />
                                             {recipeSteps.length > 1 && (
@@ -349,10 +353,13 @@ export default function RecipeForm() {
                                                     className={buttonClass}
                                                     onClick={(e) => {
                                                         e.preventDefault();
-                                                        setSteps([
-                                                            ...recipeSteps.slice(0, i),
-                                                            ...recipeSteps.slice(i + 1),
-                                                        ]);
+                                                        setRecipeState({
+                                                            ...recipeState,
+                                                            recipeSteps: [
+                                                                ...recipeSteps.slice(0, i),
+                                                                ...recipeSteps.slice(i + 1),
+                                                            ],
+                                                        });
                                                     }}
                                                 >
                                                     Remove
@@ -465,11 +472,7 @@ export default function RecipeForm() {
                                             return console.warn('Rejecting clear operation');
                                         }
 
-                                        setRecipeName('');
-                                        setRecipeDate(new Date());
-                                        setRecipeDesc('');
-                                        setIngredients(new Array(defaultIngredientsCount).fill(''));
-                                        setSteps(new Array(defaultStepsCount).fill(''));
+                                        setRecipeState(getDefaultRecipeData());
                                         setRecipeImageFile(null);
                                     }}
                                 >
