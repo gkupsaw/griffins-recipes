@@ -423,8 +423,8 @@ export default function RecipeForm() {
                                 )}
                                 <button
                                     disabled={submitting}
-                                    className={`bg-${submitting ? 'blue' : 'green'}-300 hover:bg-${
-                                        submitting ? 'blue' : 'green'
+                                    className={`bg-${submitting ? 'blue' : 'gray'}-300 hover:bg-${
+                                        submitting ? 'blue' : 'gray'
                                     }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
