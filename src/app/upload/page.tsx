@@ -1,7 +1,6 @@
 'use client';
 
 import { Authenticator } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -25,7 +24,7 @@ const gray = {
 };
 
 const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text-left';
-const buttonClass = `my-2 hover:${gray.secondary} text-white px-2 rounded-xs transition duration-300 ease-in-out`;
+const buttonClass = `hover:${gray.secondary} text-white px-2 rounded-xs transition duration-300 ease-in-out`;
 const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
 
 const defaultIngredientsCount = 5;
@@ -198,19 +197,19 @@ export default function RecipeForm() {
     }
 
     return (
-        <div className='font-sans grid items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20'>
+        <div className='font-sans flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20 md:px-[20%]'>
             <Authenticator hideSignUp>
                 {({ signOut }) => (
-                    <form className='font-mono flex flex-col gap-[32px] row-start-2'>
+                    <form className='font-mono flex flex-col gap-[32px] row-start-2 w-full max-w-full'>
                         <div
                             id='Title'
-                            className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'
+                            className='flex flex-1 flex-col row-start-2 items-center sm:items-center md:text-5xl text-3xl w-full max-w-full'
                         >
-                            <input
+                            <textarea
                                 value={recipeName}
                                 placeholder='Recipe name'
                                 onChange={(e) => setRecipeName(e.target.value)}
-                                className='text-center pb-4'
+                                className='text-center pb-4 w-full max-w-full wrap-break-word'
                             />
                             {recipeImageFile ? (
                                 <Image
@@ -245,30 +244,32 @@ export default function RecipeForm() {
                             </label>
                         </div>
                         <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
-                            <div className='flex flex-row text-sm/6 text-center text-left gap-[16px]'>
-                                <p className='text-3xl text-center text-left'>
-                                    Born on {recipeDate.toLocaleDateString()}
-                                </p>
-                                <button
-                                    className={buttonClass}
-                                    onClick={(e) => {
-                                        e.preventDefault();
-                                        setRecipeDate(new Date());
-                                    }}
-                                >
-                                    Reset
-                                </button>
+                            <div id='Date' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
+                                <div id='Date title' className='flex flex-row w-full items-stretch'>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>
+                                        Born on {recipeDate.toLocaleDateString()}
+                                    </p>
+                                    <button
+                                        className={buttonClass}
+                                        onClick={(e) => {
+                                            e.preventDefault();
+                                            setRecipeDate(new Date());
+                                        }}
+                                    >
+                                        Reset
+                                    </button>
+                                </div>
+                                <textarea
+                                    value={recipeDesc}
+                                    placeholder='Recipe description'
+                                    onChange={(e) => setRecipeDesc(e.target.value)}
+                                    className={inputClass}
+                                />
                             </div>
-                            <textarea
-                                value={recipeDesc}
-                                placeholder='Recipe description'
-                                onChange={(e) => setRecipeDesc(e.target.value)}
-                                className={inputClass}
-                            />
                             <hr />
                             <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
                                 <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
-                                    <p className='flex-grow text-3xl text-center text-left'>Ingredients</p>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Ingredients</p>
                                     <button
                                         className={buttonClass}
                                         onClick={(e) => {
@@ -317,7 +318,7 @@ export default function RecipeForm() {
                             </div>
                             <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                                 <div id='Steps title' className='flex flex-row w-full items-stretch'>
-                                    <p className='flex-grow text-3xl text-center text-left'>Steps</p>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Steps</p>
                                     <button
                                         className={buttonClass}
                                         onClick={(e) => {
@@ -363,7 +364,9 @@ export default function RecipeForm() {
                             </div>
                             <div id='Import' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                                 <div id='Import title' className='flex flex-row w-full items-stretch'>
-                                    <p className='flex-grow text-3xl text-center text-left'>Import existing recipe</p>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>
+                                        Import existing recipe
+                                    </p>
                                 </div>
                                 <div className='flex flex-row w-full text-sm/6 text-center text-left'>
                                     <input
@@ -540,26 +543,29 @@ export default function RecipeForm() {
                     </form>
                 )}
             </Authenticator>
-            <footer className='row-start-3 flex gap-[24px] flex-row flex-wrap items-center justify-center'>
+            <footer className='flex flex-row justify-items-center'>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    className='hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/griffins-recipes'
+                    style={{ width: '5em' }}
                 >
                     Home
                 </a>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4 text-3xl'
+                    className='hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
                     target='_blank'
                     rel='noopener noreferrer'
+                    style={{ width: '5em' }}
                 >
                     <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    className='hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/'
                     target='_blank'
                     rel='noopener noreferrer'
+                    style={{ width: '5em' }}
                 >
                     Click me!
                 </a>

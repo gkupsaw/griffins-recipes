@@ -124,26 +124,29 @@ export default function RecipePage() {
                     </div>
                 </div>
             </main>
-            <footer className='row-start-3 flex gap-[24px] flex-row flex-wrap items-center justify-center pt-8'>
+            <footer className='flex flex-row justify-items-center'>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    className='hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/griffins-recipes'
+                    style={{ width: '5em' }}
                 >
                     Home
                 </a>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4 text-3xl'
+                    className='hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
                     target='_blank'
                     rel='noopener noreferrer'
+                    style={{ width: '5em' }}
                 >
                     <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
-                    className='flex items-center gap-2 hover:underline hover:underline-offset-4'
+                    className='hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/'
                     target='_blank'
                     rel='noopener noreferrer'
+                    style={{ width: '5em' }}
                 >
                     Click me!
                 </a>
