@@ -38,8 +38,8 @@ const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text
 const buttonClass = `hover:${gray.secondary} text-white px-2 rounded-xs transition duration-300 ease-in-out`;
 const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
 
-const defaultIngredientsCount = 5;
-const defaultStepsCount = 5;
+const defaultIngredientsCount = 1;
+const defaultStepsCount = 1;
 
 export default function RecipeForm() {
     const [submitting, setSubmitting] = useState(false);
@@ -349,13 +349,11 @@ export default function RecipeForm() {
                                                 placeholder={`Ingredient ${i + 1}`}
                                                 className={inputClass}
                                                 onChange={(e) => {
-                                                    const values = e.target.value.split('\n');
-                                                    console.log(values);
                                                     setRecipeState({
                                                         ...recipeState,
                                                         recipeIngredients: [
                                                             ...recipeIngredients.slice(0, i),
-                                                            e.target.value,
+                                                            ...e.target.value.split('\n'),
                                                             ...recipeIngredients.slice(i + 1),
                                                         ],
                                                     });
