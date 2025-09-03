@@ -604,9 +604,9 @@ export default function RecipeForm() {
                                 </button>
                                 <button
                                     disabled={disabled}
-                                    className={`bg-${disabled ? 'blue' : 'yellow'}-300 hover:bg-${
+                                    className={`bg-${disabled ? 'blue' : 'yellow'}-800 hover:bg-${
                                         disabled ? 'blue' : 'yellow'
-                                    }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
+                                    }-600 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
 
@@ -625,7 +625,9 @@ export default function RecipeForm() {
                                     Clear form
                                 </button>
                                 <button
-                                    className='bg-yellow-300 hover:bg-yellow-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
+                                    className={`bg-${disabled ? 'blue' : 'yellow'}-800 hover:bg-${
+                                        disabled ? 'blue' : 'yellow'
+                                    }-600 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
                                         if (window.confirm('Download ALL recipes? This will take a while.')) {
@@ -682,7 +684,7 @@ export default function RecipeForm() {
                                     Download All
                                 </button>
                                 <button
-                                    className='bg-red-300 hover:bg-red-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
+                                    className='bg-red-900 hover:bg-red-700 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
                                     onClick={(e) => {
                                         e.preventDefault();
                                         if (window.confirm('Sign out of the Upload page?')) {
