@@ -353,7 +353,10 @@ export default function RecipeForm() {
                                                         ...recipeState,
                                                         recipeIngredients: [
                                                             ...recipeIngredients.slice(0, i),
-                                                            ...e.target.value.split('\n'),
+                                                            ...e.target.value
+                                                                .split('\n')
+                                                                // Filter out non-ASCII chars
+                                                                .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
                                                             ...recipeIngredients.slice(i + 1),
                                                         ],
                                                     });
@@ -408,7 +411,10 @@ export default function RecipeForm() {
                                                         ...recipeState,
                                                         recipeSteps: [
                                                             ...recipeSteps.slice(0, i),
-                                                            e.target.value,
+                                                            ...e.target.value
+                                                                .split('\n')
+                                                                // Filter out non-ASCII chars
+                                                                .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
                                                             ...recipeSteps.slice(i + 1),
                                                         ],
                                                     })
