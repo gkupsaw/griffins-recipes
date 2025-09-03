@@ -6,7 +6,7 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import { downloadData, getUrl, list, uploadData } from 'aws-amplify/storage';
+import { downloadData, getUrl, list, remove, uploadData } from 'aws-amplify/storage';
 import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
@@ -255,6 +255,38 @@ export default function RecipeForm() {
             (isPrivate ? '&private=true' : '');
 
         setRecipeUrl(uploadedRecipeUrl);
+
+        console.log(`Checking if duplicate data for ${directory} needs cleanup...`);
+
+        const otherTopLevelFolder = isPrivate ? 'recipe-data' : 'private-recipe-data';
+        const otherDirectory = `${otherTopLevelFolder}/${recipeDirName}`;
+        const otherRecipeDataPath = `${otherDirectory}/data.json`;
+        const otherRecipeImagePath = `${otherDirectory}/image.png`;
+
+        const otherRecipeDataExists = await getUrl({
+            path: otherRecipeDataPath,
+            options: { validateObjectExistence: true },
+        })
+            .then(() => true)
+            .catch(() => false);
+
+        if (otherRecipeDataExists) {
+            try {
+                console.log(`Removing ${otherRecipeDataPath}...`);
+                await remove({ path: otherRecipeDataPath });
+            } catch (e) {
+                console.error(`Could not clean up data: ${e}`);
+            }
+
+            try {
+                console.log(`Removing ${otherRecipeImagePath}...`);
+                await remove({ path: otherRecipeImagePath });
+            } catch (e) {
+                console.warn(`Could not clean up image: ${e}`);
+            }
+        } else {
+            console.log('No duplicate data found');
+        }
     }
 
     const disabled = submitting || importing;
@@ -474,8 +506,8 @@ export default function RecipeForm() {
                                         disabled={disabled}
                                     />
                                     <datalist id='existing-recipes'>
-                                        {existingRecipes?.map((recipe) => (
-                                            <option key={recipe} value={recipe} />
+                                        {existingRecipes?.map((recipe, i) => (
+                                            <option key={i} value={recipe} />
                                         ))}
                                     </datalist>
                                     <button
