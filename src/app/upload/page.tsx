@@ -198,8 +198,18 @@ export default function RecipeForm() {
 
     async function handleUpload() {
         if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
-            window.alert('Invalid input, all fields must be filled');
-            // window.alert(`Missing input for the following fields: ${Object.entries(recipeState)}`);
+            window.alert(
+                `Missing input for the following fields: ${Object.entries({
+                    recipeName,
+                    recipeDesc,
+                    recipeIngredients,
+                    recipeSteps,
+                })
+                    .filter(([_, v]) =>
+                        typeof v === 'object' ? (v as string[]).some((s) => s.length === 0) : v.length === 0
+                    )
+                    .map(([k, _]) => k)}`
+            );
             return console.warn(`Invalid input: recipeState=${JSON.stringify(recipeState)}`);
         }
 
