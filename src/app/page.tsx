@@ -68,7 +68,7 @@ export default function RecipePage() {
                       isPrivate: true,
                   }))
                 : [];
-            setRecipes([...publicRecipes, ...privateRecipes]);
+            setRecipes([...privateRecipes, ...publicRecipes]);
         })();
     }, []);
 

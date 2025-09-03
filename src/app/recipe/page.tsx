@@ -41,9 +41,9 @@ export default function RecipePage() {
                 redirect('/');
             }
 
-            const isRecipePrivate = searchParams.get('private');
+            const topLevelFolder = searchParams.get('private') === 'true' ? 'private-recipe-data' : 'recipe-data';
 
-            await downloadData({ path: `recipe-data/${recipeDirName}/data.json` })
+            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/data.json` })
                 .result.then(({ body }) =>
                     body
                         .text()
@@ -58,7 +58,7 @@ export default function RecipePage() {
                 )
                 .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
 
-            await downloadData({ path: `recipe-data/${recipeDirName}/image.png` })
+            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/image.png` })
                 .result.then(({ body }) =>
                     body
                         .blob()
