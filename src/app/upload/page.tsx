@@ -11,6 +11,10 @@ import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
 
+type RecipeTags = {
+    readonly author?: string;
+};
+
 type RecipeData = {
     readonly recipeDateMilliseconds: number;
     readonly recipeName: string;
@@ -18,6 +22,7 @@ type RecipeData = {
     readonly recipeIngredients: string[];
     readonly recipeSteps: string[];
     readonly isPrivate: boolean;
+    readonly tags?: RecipeTags;
 };
 
 const getDefaultRecipeData = (): RecipeData => ({
@@ -58,7 +63,15 @@ export default function RecipeForm() {
 
     const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
     const [recipeState, setRecipeState] = useState<RecipeData>(getDefaultRecipeData());
-    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps, isPrivate } = recipeState;
+    const {
+        recipeName,
+        recipeDesc,
+        recipeDateMilliseconds,
+        recipeIngredients,
+        recipeSteps,
+        isPrivate,
+        tags,
+    } = recipeState;
 
     const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
@@ -75,6 +88,7 @@ export default function RecipeForm() {
                     recipeIngredients: inProgressRecipeData.recipeIngredients ?? recipeIngredients,
                     recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
                     isPrivate: inProgressRecipeData.isPrivate ?? isPrivate,
+                    tags: inProgressRecipeData.tags ?? tags,
                 });
             }
         }
@@ -369,6 +383,20 @@ export default function RecipeForm() {
                                     value={recipeDesc}
                                     placeholder='Recipe description'
                                     onChange={(e) => setRecipeState({ ...recipeState, recipeDesc: e.target.value })}
+                                    className={inputClass}
+                                />
+                            </div>
+                            <div id='Date' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
+                                <p className='flex-grow text-xl md:text-3xl text-center text-left'>Author</p>
+                                <textarea
+                                    value={tags?.author ?? ''}
+                                    placeholder='Recipe author'
+                                    onChange={(e) =>
+                                        setRecipeState({
+                                            ...recipeState,
+                                            tags: { ...(tags ?? {}), author: e.target.value.trim() },
+                                        })
+                                    }
                                     className={inputClass}
                                 />
                             </div>
