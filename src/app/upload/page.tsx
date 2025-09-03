@@ -71,15 +71,6 @@ export default function RecipeForm() {
             });
         }
 
-        getCurrentUser()
-            .then((currentUser) => {
-                setUser(currentUser);
-                console.log('Signed in');
-            })
-            .catch((e) => {
-                console.log(`Could not retrieve current user: ${e}`);
-            });
-
         async function loadExistingRecipes(topLevelFolder: string): Promise<string[]> {
             try {
                 const result = await list({
@@ -105,6 +96,14 @@ export default function RecipeForm() {
         }
 
         (async () => {
+            try {
+                setUser(await getCurrentUser());
+                console.log('Signed in');
+            } catch (e) {
+                console.log(`Could not retrieve current user: ${e}`);
+                return;
+            }
+
             setExistingRecipes([
                 ...(await loadExistingRecipes('recipe-data')),
                 ...(await loadExistingRecipes('private-recipe-data')),
