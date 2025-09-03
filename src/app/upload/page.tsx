@@ -271,7 +271,7 @@ export default function RecipeForm() {
                             <textarea
                                 value={recipeName}
                                 placeholder='Recipe name'
-                                onChange={(e) => setRecipeState({ ...recipeState, recipeName: e.target.value })}
+                                onChange={(e) => setRecipeState({ ...recipeState, recipeName: e.target.value.trim() })}
                                 className='text-center pb-4 wrap-break-word bg-gray-800 p-4 rounded-sm'
                             />
                             {recipeImageFile ? (
