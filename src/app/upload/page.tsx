@@ -202,6 +202,8 @@ export default function RecipeForm() {
         setRecipeUrl(uploadedRecipeUrl);
     }
 
+    const disabled = submitting || importing;
+
     return (
         <div className='font-sans flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20 md:px-[20%]'>
             <Authenticator hideSignUp>
@@ -402,7 +404,7 @@ export default function RecipeForm() {
                                         placeholder='Select existing recipe'
                                         value={existingRecipeToImport}
                                         onChange={(e) => setExistingRecipeToImport(e.target.value)}
-                                        disabled={importing}
+                                        disabled={disabled}
                                     />
                                     <datalist id='existing-recipes'>
                                         {existingRecipes?.map((recipe) => (
@@ -410,13 +412,13 @@ export default function RecipeForm() {
                                         ))}
                                     </datalist>
                                     <button
-                                        disabled={importing}
+                                        disabled={disabled}
                                         className={buttonClass}
                                         onClick={async (e) => {
                                             e.preventDefault();
 
-                                            if (importing) {
-                                                return console.warn('Import in progress');
+                                            if (disabled) {
+                                                return console.warn('Operation in progress, cannot import');
                                             }
 
                                             console.log('Starting import workflow...');
@@ -469,15 +471,15 @@ export default function RecipeForm() {
                                     />
                                 </div>
                                 <button
-                                    disabled={submitting}
-                                    className={`bg-${submitting ? 'blue' : 'green'}-300 hover:bg-${
-                                        submitting ? 'blue' : 'green'
+                                    disabled={disabled}
+                                    className={`bg-${disabled ? 'blue' : 'gray'}-300 hover:bg-${
+                                        disabled ? 'blue' : 'gray'
                                     }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
 
-                                        if (submitting) {
-                                            return console.warn('Upload in progress');
+                                        if (disabled) {
+                                            return console.warn('Operation in progress, cannot submit');
                                         }
 
                                         console.log('Starting upload workflow...');
@@ -494,14 +496,14 @@ export default function RecipeForm() {
                                     {submitting ? 'Submitting...' : 'Submit'}
                                 </button>
                                 <button
-                                    disabled={submitting || importing}
-                                    className={`bg-${submitting || importing ? 'blue' : 'gray'}-300 hover:bg-${
-                                        submitting || importing ? 'blue' : 'gray'
+                                    disabled={disabled}
+                                    className={`bg-${disabled ? 'blue' : 'yellow'}-300 hover:bg-${
+                                        disabled ? 'blue' : 'yellow'
                                     }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
 
-                                        if (submitting || importing) {
+                                        if (disabled) {
                                             return console.warn('Operation in progress, cannot clear form');
                                         }
 
