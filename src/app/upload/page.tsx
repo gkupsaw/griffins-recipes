@@ -149,9 +149,8 @@ export default function RecipeForm() {
             const inProgressRecipe = localStorage.getItem('in-progress-recipe');
             if (inProgressRecipe !== null) {
                 loadSessionRecipe(inProgressRecipe);
-            } else {
-                loadRecipeIfInUrl();
             }
+            loadRecipeIfInUrl();
         })();
     }, []);
 
@@ -199,6 +198,7 @@ export default function RecipeForm() {
     async function handleUpload() {
         if ([recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some((s) => s.length === 0)) {
             window.alert('Invalid input, all fields must be filled');
+            // window.alert(`Missing input for the following fields: ${Object.entries(recipeState)}`);
             return console.warn(`Invalid input: recipeState=${JSON.stringify(recipeState)}`);
         }
 
