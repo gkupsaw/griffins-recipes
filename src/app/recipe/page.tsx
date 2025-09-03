@@ -15,6 +15,7 @@ type RecipeData = {
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
     readonly recipeSteps: string[];
+    readonly isPrivate: boolean;
 };
 
 const gray = {
@@ -124,6 +125,15 @@ export default function RecipePage() {
                             ))}
                         </ul>
                     </div>
+                    {recipeData && (
+                        <a
+                            className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                            href={`upload?recipename=${recipeData.recipeName}&private=${recipeData.isPrivate}`}
+                            style={{ width: '6em' }}
+                        >
+                            Edit
+                        </a>
+                    )}
                 </div>
             </main>
             <footer className='flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8'>
