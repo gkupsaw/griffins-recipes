@@ -543,16 +543,16 @@ export default function RecipeForm() {
                     </form>
                 )}
             </Authenticator>
-            <footer className='flex flex-row justify-items-center'>
+            <footer className='flex flex-row justify-items-center items-center'>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/griffins-recipes'
                     style={{ width: '5em' }}
                 >
                     Home
                 </a>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center text-3xl'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
                     target='_blank'
                     rel='noopener noreferrer'
@@ -561,7 +561,7 @@ export default function RecipeForm() {
                     <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/'
                     target='_blank'
                     rel='noopener noreferrer'

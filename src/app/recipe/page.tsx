@@ -75,7 +75,7 @@ export default function RecipePage() {
     const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
 
     return (
-        <div className='font-mono grid items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
+        <div className='font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
             <main className='flex flex-col gap-[32px] row-start-2 justify-center'>
                 <div id='Title' className='flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl'>
                     <p className='text-center pb-4'>{loading ? LOADING : recipeData.recipeName}</p>
@@ -124,29 +124,29 @@ export default function RecipePage() {
                     </div>
                 </div>
             </main>
-            <footer className='flex flex-row justify-items-center'>
+            <footer className='flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8'>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/griffins-recipes'
-                    style={{ width: '5em' }}
+                    style={{ width: '6em' }}
                 >
                     Home
                 </a>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center text-3xl'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
                     target='_blank'
                     rel='noopener noreferrer'
-                    style={{ width: '5em' }}
+                    style={{ width: '6em' }}
                 >
                     <FontAwesomeIcon icon={faGithub} />
                 </a>
                 <a
-                    className='hover:underline hover:underline-offset-4 text-center'
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
                     href='https://www.griffinkupsaw.com/'
                     target='_blank'
                     rel='noopener noreferrer'
-                    style={{ width: '5em' }}
+                    style={{ width: '6em' }}
                 >
                     Click me!
                 </a>
