@@ -60,6 +60,7 @@ export default function RecipeForm() {
         const inProgressRecipe = localStorage.getItem('in-progress-recipe');
         if (inProgressRecipe !== null) {
             console.log(`In progress recipe data found: ${inProgressRecipe}`);
+            window.alert('Found input from a previous session, loading it in!');
             const inProgressRecipeData: RecipeData = JSON.parse(inProgressRecipe);
             setRecipeState({
                 recipeName: inProgressRecipeData.recipeName ?? recipeName,
