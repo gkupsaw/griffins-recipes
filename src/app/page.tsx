@@ -39,8 +39,8 @@ export default function RecipePage() {
                 });
 
                 return (
-                    result.excludedSubpaths?.map(
-                        (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
+                    result.excludedSubpaths?.map((recipePath) =>
+                        (recipePath.split(topLevelFolder)[1] ?? '{misformatted recipe name}/').slice(1, -1)
                     ) ?? []
                 );
             } catch (e) {
