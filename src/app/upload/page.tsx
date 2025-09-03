@@ -262,7 +262,7 @@ export default function RecipeForm() {
                                 value={recipeName}
                                 placeholder='Recipe name'
                                 onChange={(e) => setRecipeState({ ...recipeState, recipeName: e.target.value })}
-                                className='text-center pb-4 w-full max-w-full wrap-break-word'
+                                className='text-center pb-4 wrap-break-word bg-gray-800 p-4 rounded-sm'
                             />
                             {recipeImageFile ? (
                                 <Image
