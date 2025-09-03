@@ -29,6 +29,12 @@ const getDefaultRecipeData = (): RecipeData => ({
     isPrivate: false,
 });
 
+// For simplicity and ease of querying I'm using the recipe name as the folder ID
+// Obviously this is a big no-no for a real app, but with the limited user-set the worst case scenario is a malformed recipe
+const sanitizeRecipeName = (s: string): string => {
+    return s.trim().replaceAll('/', '');
+};
+
 const gray = {
     primary: 'bg-gray-800',
     secondary: 'bg-gray-500',
@@ -303,7 +309,9 @@ export default function RecipeForm() {
                             <textarea
                                 value={recipeName}
                                 placeholder='Recipe name'
-                                onChange={(e) => setRecipeState({ ...recipeState, recipeName: e.target.value.trim() })}
+                                onChange={(e) =>
+                                    setRecipeState({ ...recipeState, recipeName: sanitizeRecipeName(e.target.value) })
+                                }
                                 className='text-center pb-4 wrap-break-word bg-gray-800 p-4 rounded-sm'
                             />
                             {recipeImageFile ? (
