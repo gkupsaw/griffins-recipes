@@ -95,6 +95,37 @@ export default function RecipeForm() {
             }
         }
 
+        async function loadRecipeIfInUrl() {
+            const searchParams = new URLSearchParams(document.location.search);
+            const recipeDirName = searchParams.get('recipename');
+            const topLevelFolder = searchParams.get('private') === 'true' ? 'private-recipe-data' : 'recipe-data';
+
+            console.log('Found recipe params in URL, attempting download');
+
+            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/data.json` })
+                .result.then(({ body }) =>
+                    body
+                        .text()
+                        .then((text) => {
+                            const parsedRecipeData: RecipeData = JSON.parse(text);
+                            setRecipeState(parsedRecipeData);
+                        })
+                        .catch((e) => window.alert(`Could not unpack recipe ${recipeDirName}: ${e}`))
+                )
+                .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
+
+            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/image.png` })
+                .result.then(({ body }) =>
+                    body
+                        .blob()
+                        .then((image) => setRecipeImageFile(new File([image], 'image.png')))
+                        .catch((e) => window.alert(`Could not unpack image for recipe ${recipeDirName}: ${e}`))
+                )
+                .catch((e) => {
+                    console.warn(`Could not retrieve image for recipe ${recipeDirName}: ${e}`);
+                });
+        }
+
         (async () => {
             try {
                 setUser(await getCurrentUser());
@@ -108,6 +139,8 @@ export default function RecipeForm() {
                 ...(await loadExistingRecipes('recipe-data')),
                 ...(await loadExistingRecipes('private-recipe-data')),
             ]);
+
+            loadRecipeIfInUrl();
         })();
     }, []);
 
