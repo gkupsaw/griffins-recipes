@@ -107,8 +107,8 @@ export default function RecipePage() {
                         />
                     )}
                 </div>
-                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
-                    <p className='text-3xl text-center text-left'>
+                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2'>
+                    <p className='text-3xl text-left'>
                         Born on {loading ? LOADING : new Date(recipeData.recipeDateMilliseconds).toLocaleDateString()}
                     </p>
                     <p className={inputClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
