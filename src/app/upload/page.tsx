@@ -423,8 +423,8 @@ export default function RecipeForm() {
                                 )}
                                 <button
                                     disabled={submitting}
-                                    className={`bg-${submitting ? 'blue' : 'gray'}-300 hover:bg-${
-                                        submitting ? 'blue' : 'gray'
+                                    className={`bg-${submitting ? 'blue' : 'green'}-300 hover:bg-${
+                                        submitting ? 'blue' : 'green'
                                     }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
@@ -445,6 +445,32 @@ export default function RecipeForm() {
                                     }}
                                 >
                                     {submitting ? 'Submitting...' : 'Submit'}
+                                </button>
+                                <button
+                                    disabled={submitting || importing}
+                                    className={`bg-${submitting || importing ? 'blue' : 'gray'}-300 hover:bg-${
+                                        submitting || importing ? 'blue' : 'gray'
+                                    }-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+
+                                        if (submitting || importing) {
+                                            return console.warn('Operation in progress, cannot clear form');
+                                        }
+
+                                        if (!window.confirm('Completely clear the upload form?')) {
+                                            return console.warn('Rejecting clear operation');
+                                        }
+
+                                        setRecipeName('');
+                                        setRecipeDate(new Date());
+                                        setRecipeDesc('');
+                                        setIngredients(new Array(defaultIngredientsCount).fill(''));
+                                        setSteps(new Array(defaultStepsCount).fill(''));
+                                        setRecipeImageFile(null);
+                                    }}
+                                >
+                                    Clear form
                                 </button>
                                 <button
                                     className='bg-yellow-300 hover:bg-yellow-400 text-gray-800 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
