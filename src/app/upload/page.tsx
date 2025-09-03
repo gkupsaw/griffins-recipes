@@ -323,6 +323,10 @@ export default function RecipeForm() {
                             </div>
                             <hr />
                             <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
+                                <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
+                                    Press <code>Enter</code> on an ingredient or step input to add another input. Or,
+                                    paste multiline input (text separated with a newline) to add multiple items at once.
+                                </p>
                                 <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-xl md:text-3xl text-center text-left'>Ingredients</p>
                                     <button
