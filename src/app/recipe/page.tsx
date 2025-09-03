@@ -138,13 +138,22 @@ export default function RecipePage() {
                         </ul>
                     </div>
                     {recipeData && user?.signInDetails && (
-                        <a
-                            className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                            href={`upload?recipename=${recipeData.recipeName}&private=${recipeData.isPrivate}`}
-                            style={{ width: '6em' }}
-                        >
-                            Edit
-                        </a>
+                        <>
+                            <a
+                                className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                                href={`upload?recipename=${recipeData.recipeName}&private=${recipeData.isPrivate}`}
+                                style={{ width: '6em' }}
+                            >
+                                Edit
+                            </a>
+                            <a
+                                className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                                href='upload'
+                                style={{ width: '6em' }}
+                            >
+                                Upload new
+                            </a>
+                        </>
                     )}
                 </div>
             </main>

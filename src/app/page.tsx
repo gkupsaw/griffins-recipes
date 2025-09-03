@@ -108,6 +108,13 @@ export default function RecipePage() {
             </main>
             <footer className='flex flex-row justify-items-center flex-wrap row-start-3 my-8'>
                 <a
+                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                    href='upload'
+                    style={{ width: '6em' }}
+                >
+                    Upload new recipe
+                </a>
+                <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
                     target='_blank'
