@@ -79,29 +79,36 @@ export default function RecipeForm() {
                 console.log(`Could not retrieve current user: ${e}`);
             });
 
-        async function loadExistingRecipes() {
-            const topLevelFolder = 'recipe-data';
-            await list({
-                path: `${topLevelFolder}/`,
-                options: {
-                    listAll: true,
-                    subpathStrategy: {
-                        strategy: 'exclude',
-                        delimiter: '/',
+        async function loadExistingRecipes(topLevelFolder: string): Promise<string[]> {
+            try {
+                const result = await list({
+                    path: `${topLevelFolder}/`,
+                    options: {
+                        listAll: true,
+                        subpathStrategy: {
+                            strategy: 'exclude',
+                            delimiter: '/',
+                        },
                     },
-                },
-            })
-                .then((result) => {
-                    setExistingRecipes(
-                        result.excludedSubpaths?.map(
-                            (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
-                        ) ?? []
-                    );
-                })
-                .catch((e) => window.alert(`Could not retrieve recipes: ${e}`));
+                });
+
+                return (
+                    result.excludedSubpaths?.map(
+                        (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
+                    ) ?? []
+                );
+            } catch (e) {
+                window.alert(`Could not retrieve recipes: ${e}`);
+                return [];
+            }
         }
 
-        loadExistingRecipes();
+        (async () => {
+            setExistingRecipes([
+                ...(await loadExistingRecipes('recipe-data')),
+                ...(await loadExistingRecipes('private-recipe-data')),
+            ]);
+        })();
     }, []);
 
     useEffect(() => {
@@ -115,7 +122,13 @@ export default function RecipeForm() {
             return window.alert('No recipe name provided');
         }
 
-        await downloadData({ path: `recipe-data/${existingRecipeToImport}/data.json` })
+        const topLevelFolder = ['y', 'Y', 'yes', 'Yes'].includes(
+            window.prompt('Is this recipe private? (Yes/No)') ?? ''
+        )
+            ? 'private-recipe-data'
+            : 'recipe-data';
+
+        await downloadData({ path: `${topLevelFolder}/${existingRecipeToImport}/data.json` })
             .result.then(({ body }) =>
                 body
                     .text()
@@ -127,7 +140,7 @@ export default function RecipeForm() {
             )
             .catch((e) => window.alert(`Could not retrieve recipe ${existingRecipeToImport}: ${e}`));
 
-        await downloadData({ path: `recipe-data/${existingRecipeToImport}/image.png` })
+        await downloadData({ path: `${topLevelFolder}/${existingRecipeToImport}/image.png` })
             .result.then(({ body }) =>
                 body
                     .blob()
@@ -146,7 +159,8 @@ export default function RecipeForm() {
         }
 
         const recipeDirName = recipeName;
-        const directory = `recipe-data/${recipeDirName}`;
+        const topLevelFolder = isPrivate ? 'private-recipe-data' : 'recipe-data';
+        const directory = `${topLevelFolder}/${recipeDirName}`;
         const recipeDataPath = `${directory}/data.json`;
         const recipeImagePath = `${directory}/image.png`;
 
@@ -179,7 +193,12 @@ export default function RecipeForm() {
             });
         }
 
-        const uploadedRecipeUrl = window.location.href.split('upload')[0] + 'recipe?recipename=' + recipeDirName;
+        const uploadedRecipeUrl =
+            window.location.href.split('upload')[0] +
+            'recipe?recipename=' +
+            recipeDirName +
+            (isPrivate ? '&private=' : '');
+
         setRecipeUrl(uploadedRecipeUrl);
     }
 
@@ -503,13 +522,18 @@ export default function RecipeForm() {
                                         if (window.confirm('Download ALL recipes? This will take a while.')) {
                                             console.log(`Listing all data...`);
 
-                                            const allFiles = await list({
+                                            const publicListResult = await list({
                                                 path: 'recipe-data/',
                                                 options: { listAll: true },
                                             });
+                                            const privateListResult = await list({
+                                                path: 'private-recipe-data/',
+                                                options: { listAll: true },
+                                            });
+                                            const allItems = [...privateListResult.items, ...publicListResult.items];
 
                                             const allResults = await Promise.all(
-                                                allFiles.items.map(async (item) => {
+                                                allItems.map(async (item) => {
                                                     console.log(`Downloading ${item.path}...`);
                                                     const data = await downloadData({ path: item.path }).result;
                                                     console.log(`Downloaded ${item.path}`);

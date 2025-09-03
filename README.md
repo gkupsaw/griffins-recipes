@@ -83,6 +83,12 @@ bun dev
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
+To deploy the backend:
+
+```bash
+npx ampx sandbox
+```
+
 ## References
 
 -   [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.

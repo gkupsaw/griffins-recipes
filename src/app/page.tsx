@@ -18,41 +18,45 @@ const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p
 
 export default function RecipePage() {
     const [recipes, setRecipes] = useState<string[] | null>(null);
-    const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
-        async function loadData() {
-            const topLevelFolder = 'recipe-data';
-            await list({
-                path: `${topLevelFolder}/`,
-                options: {
-                    listAll: true,
-                    subpathStrategy: {
-                        strategy: 'exclude',
-                        delimiter: '/',
+        async function loadRecipes(topLevelFolder: string): Promise<string[]> {
+            try {
+                const result = await list({
+                    path: `${topLevelFolder}/`,
+                    options: {
+                        listAll: true,
+                        subpathStrategy: {
+                            strategy: 'exclude',
+                            delimiter: '/',
+                        },
                     },
-                },
-            })
-                .then((result) => {
-                    setRecipes(
-                        result.excludedSubpaths?.map(
-                            (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
-                        ) ?? []
-                    );
-                })
-                .catch((e) => window.alert(`Could not retrieve recipes: ${e}`));
+                });
+
+                return (
+                    result.excludedSubpaths?.map(
+                        (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
+                    ) ?? []
+                );
+            } catch (e) {
+                window.alert(`Could not retrieve recipes: ${e}`);
+                return [];
+            }
         }
 
-        loadData();
-
-        getCurrentUser()
-            .then((currentUser) => {
-                setUser(currentUser);
+        (async () => {
+            let user: AuthUser | null = null;
+            try {
+                user = await getCurrentUser();
                 console.log('Signed in');
-            })
-            .catch((e) => {
+            } catch (e) {
                 console.log(`Could not retrieve current user: ${e}`);
-            });
+            }
+
+            const publicRecipes = await loadRecipes('recipe-data');
+            const privateRecipes = user?.signInDetails ? await loadRecipes('private-recipe-data') : [];
+            setRecipes([...publicRecipes, ...privateRecipes]);
+        })();
     }, []);
 
     const loading = recipes === null;

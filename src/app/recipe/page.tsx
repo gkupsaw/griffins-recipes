@@ -41,6 +41,8 @@ export default function RecipePage() {
                 redirect('/');
             }
 
+            const isRecipePrivate = searchParams.get('private');
+
             await downloadData({ path: `recipe-data/${recipeDirName}/data.json` })
                 .result.then(({ body }) =>
                     body
