@@ -252,7 +252,7 @@ export default function RecipeForm() {
             window.location.href.split('upload')[0] +
             'recipe?recipename=' +
             recipeDirName +
-            (isPrivate ? '&private=' : '');
+            (isPrivate ? '&private=true' : '');
 
         setRecipeUrl(uploadedRecipeUrl);
     }
