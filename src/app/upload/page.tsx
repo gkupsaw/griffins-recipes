@@ -498,10 +498,35 @@ export default function RecipeForm() {
                                     ))}
                                 </ul>
                             </div>
+                            <div id='Private' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
+                                <div
+                                    id='Private title'
+                                    className='flex flex-row items-center gap-4 w-full justify-start'
+                                >
+                                    <label htmlFor='isPrivate' className='flex-grow text-xl md:text-3xl text-left'>
+                                        Mark recipe private?
+                                    </label>
+                                </div>
+                                <div
+                                    id='Private input'
+                                    className='flex flex-row items-center gap-4 w-full justify-start'
+                                >
+                                    <p className='text-left'>{isPrivate ? 'Yes' : 'No'}</p>
+                                    <input
+                                        id='isPrivate'
+                                        type='checkbox'
+                                        className='pb-4 cursor-pointer'
+                                        style={{ width: '2em', height: '2em' }}
+                                        onChange={(e) =>
+                                            setRecipeState({ ...recipeState, isPrivate: e.target.checked })
+                                        }
+                                    />
+                                </div>
+                            </div>
                             <div id='Import' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                                 <div id='Import title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-xl md:text-3xl text-center text-left'>
-                                        Import existing recipe
+                                        Import existing recipe (optional)
                                     </p>
                                 </div>
                                 <div className='flex flex-row w-full text-sm/6 text-center text-left'>
@@ -560,23 +585,6 @@ export default function RecipeForm() {
                                         </a>
                                     </p>
                                 )}
-                                <div id='Import title' className='flex flex-row items-center gap-4'>
-                                    <label htmlFor='isPrivate' className='text-2xl'>
-                                        Mark recipe private?
-                                    </label>
-                                    <input
-                                        id='isPrivate'
-                                        type='checkbox'
-                                        className='pb-4 wrap-break-word cursor-pointer'
-                                        style={{
-                                            width: '1.5em',
-                                            height: '1.5em',
-                                        }}
-                                        onChange={(e) =>
-                                            setRecipeState({ ...recipeState, isPrivate: e.target.checked })
-                                        }
-                                    />
-                                </div>
                                 <button
                                     disabled={disabled}
                                     className={`bg-${disabled ? 'blue' : 'gray'}-300 hover:bg-${
