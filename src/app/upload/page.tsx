@@ -398,75 +398,73 @@ export default function RecipeForm() {
                                 </div>
                             </div>
                             <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
+                                <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
+                                    Press <code>Enter</code> on a step/ingredient to add another step/ingredient. Or,
+                                    paste multiline text (separated with a newline) to add multiple steps/ingredients at
+                                    once.
+                                </p>
+                                <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Ingredients</p>
+                                    {useMultibox && (
+                                        <button
+                                            className={buttonClass}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setRecipeState({
+                                                    ...recipeState,
+                                                    recipeIngredients: [...recipeIngredients, ''],
+                                                });
+                                            }}
+                                        >
+                                            Add ingredient
+                                        </button>
+                                    )}
+                                </div>
                                 {useMultibox ? (
-                                    <>
-                                        <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
-                                            Press <code>Enter</code> on a step/ingredient to add another
-                                            step/ingredient. Or, paste multiline text (separated with a newline) to add
-                                            multiple steps/ingredients at once.
-                                        </p>
-                                        <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
-                                            <p className='flex-grow text-xl md:text-3xl text-center text-left'>
-                                                Ingredients
-                                            </p>
-                                            <button
-                                                className={buttonClass}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setRecipeState({
-                                                        ...recipeState,
-                                                        recipeIngredients: [...recipeIngredients, ''],
-                                                    });
-                                                }}
+                                    <ul className={listClass}>
+                                        {recipeIngredients.map((ingredient, i) => (
+                                            <li
+                                                key={i}
+                                                className='flex flex-row items-left text-sm/6 text-center text-left'
                                             >
-                                                Add ingredient
-                                            </button>
-                                        </div>
-                                        <ul className={listClass}>
-                                            {recipeIngredients.map((ingredient, i) => (
-                                                <li
-                                                    key={i}
-                                                    className='flex flex-row items-left text-sm/6 text-center text-left'
-                                                >
-                                                    <textarea
-                                                        value={ingredient}
-                                                        placeholder={`Ingredient ${i + 1}`}
-                                                        className={inputClass}
-                                                        onChange={(e) => {
+                                                <textarea
+                                                    value={ingredient}
+                                                    placeholder={`Ingredient ${i + 1}`}
+                                                    className={inputClass}
+                                                    onChange={(e) => {
+                                                        setRecipeState({
+                                                            ...recipeState,
+                                                            recipeIngredients: [
+                                                                ...recipeIngredients.slice(0, i),
+                                                                ...e.target.value
+                                                                    .split('\n')
+                                                                    // Filter out non-ASCII chars
+                                                                    .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
+                                                                ...recipeIngredients.slice(i + 1),
+                                                            ],
+                                                        });
+                                                    }}
+                                                />
+                                                {recipeIngredients.length > 1 && (
+                                                    <button
+                                                        className={buttonClass}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
                                                             setRecipeState({
                                                                 ...recipeState,
                                                                 recipeIngredients: [
                                                                     ...recipeIngredients.slice(0, i),
-                                                                    ...e.target.value
-                                                                        .split('\n')
-                                                                        // Filter out non-ASCII chars
-                                                                        .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
                                                                     ...recipeIngredients.slice(i + 1),
                                                                 ],
                                                             });
                                                         }}
-                                                    />
-                                                    {recipeIngredients.length > 1 && (
-                                                        <button
-                                                            className={buttonClass}
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                setRecipeState({
-                                                                    ...recipeState,
-                                                                    recipeIngredients: [
-                                                                        ...recipeIngredients.slice(0, i),
-                                                                        ...recipeIngredients.slice(i + 1),
-                                                                    ],
-                                                                });
-                                                            }}
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </>
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : (
                                     <textarea
                                         value={recipeIngredients.join('\n')}
@@ -485,65 +483,65 @@ export default function RecipeForm() {
                                 )}
                             </div>
                             <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
+                                <div id='Steps title' className='flex flex-row w-full items-stretch'>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Steps</p>
+                                    {useMultibox && (
+                                        <button
+                                            className={buttonClass}
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setRecipeState({
+                                                    ...recipeState,
+                                                    recipeSteps: [...recipeSteps, ''],
+                                                });
+                                            }}
+                                        >
+                                            Add step
+                                        </button>
+                                    )}
+                                </div>
                                 {useMultibox ? (
-                                    <>
-                                        <div id='Steps title' className='flex flex-row w-full items-stretch'>
-                                            <p className='flex-grow text-xl md:text-3xl text-center text-left'>Steps</p>
-                                            <button
-                                                className={buttonClass}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    setRecipeState({
-                                                        ...recipeState,
-                                                        recipeSteps: [...recipeSteps, ''],
-                                                    });
-                                                }}
-                                            >
-                                                Add step
-                                            </button>
-                                        </div>
-                                        <ul className={listClass}>
-                                            {recipeSteps.map((ingredient, i) => (
-                                                <li key={i} className='flex flex-row text-sm/6 text-center text-left'>
-                                                    <textarea
-                                                        value={ingredient}
-                                                        placeholder={`Step ${i + 1}`}
-                                                        className={inputClass}
-                                                        onChange={(e) =>
+                                    <ul className={listClass}>
+                                        {recipeSteps.map((ingredient, i) => (
+                                            <li key={i} className='flex flex-row text-sm/6 text-center text-left'>
+                                                <textarea
+                                                    value={ingredient}
+                                                    placeholder={`Step ${i + 1}`}
+                                                    className={inputClass}
+                                                    onChange={(e) =>
+                                                        setRecipeState({
+                                                            ...recipeState,
+                                                            recipeSteps: [
+                                                                ...recipeSteps.slice(0, i),
+                                                                ...e.target.value
+                                                                    .split('\n')
+                                                                    // Filter out non-ASCII chars
+                                                                    .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
+                                                                ...recipeSteps.slice(i + 1),
+                                                            ],
+                                                        })
+                                                    }
+                                                />
+                                                {recipeSteps.length > 1 && (
+                                                    <button
+                                                        className={buttonClass}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
                                                             setRecipeState({
                                                                 ...recipeState,
                                                                 recipeSteps: [
                                                                     ...recipeSteps.slice(0, i),
-                                                                    ...e.target.value
-                                                                        .split('\n')
-                                                                        // Filter out non-ASCII chars
-                                                                        .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
                                                                     ...recipeSteps.slice(i + 1),
                                                                 ],
-                                                            })
-                                                        }
-                                                    />
-                                                    {recipeSteps.length > 1 && (
-                                                        <button
-                                                            className={buttonClass}
-                                                            onClick={(e) => {
-                                                                e.preventDefault();
-                                                                setRecipeState({
-                                                                    ...recipeState,
-                                                                    recipeSteps: [
-                                                                        ...recipeSteps.slice(0, i),
-                                                                        ...recipeSteps.slice(i + 1),
-                                                                    ],
-                                                                });
-                                                            }}
-                                                        >
-                                                            Remove
-                                                        </button>
-                                                    )}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </>
+                                                            });
+                                                        }}
+                                                    >
+                                                        Remove
+                                                    </button>
+                                                )}
+                                            </li>
+                                        ))}
+                                    </ul>
                                 ) : (
                                     <textarea
                                         value={recipeSteps.join('\n')}
