@@ -32,7 +32,7 @@ const getDefaultRecipeData = (): RecipeData => ({
 // For simplicity and ease of querying I'm using the recipe name as the folder ID
 // Obviously this is a big no-no for a real app, but with the limited user-set the worst case scenario is a malformed recipe
 const sanitizeRecipeName = (s: string): string => {
-    return s.replaceAll(/[\/\n\\t\\r]/g, '');
+    return s.replaceAll(/[\/\n\t\r]/g, '');
 };
 
 const gray = {
