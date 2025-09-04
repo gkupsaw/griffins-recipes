@@ -18,11 +18,11 @@ const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p
 
 type Recipe = {
     readonly name: string;
-    readonly isPrivate: boolean;
 };
 
 export default function RecipePage() {
-    const [recipes, setRecipes] = useState<Recipe[] | null>(null);
+    const [publicRecipes, setPublicRecipes] = useState<Recipe[] | null>(null);
+    const [privateRecipes, setPrivateRecipes] = useState<Recipe[] | null>(null);
 
     useEffect(() => {
         async function loadRecipes(topLevelFolder: string): Promise<string[]> {
@@ -58,21 +58,24 @@ export default function RecipePage() {
                 console.log(`Could not retrieve current user: ${e}`);
             }
 
-            const publicRecipes: Recipe[] = (await loadRecipes('recipe-data')).map((name) => ({
+            const loadedPublicRecipes: Recipe[] = (await loadRecipes('recipe-data')).map((name) => ({
                 name,
                 isPrivate: false,
             }));
-            const privateRecipes: Recipe[] = user?.signInDetails
+
+            const loadedPrivateRecipes = user?.signInDetails
                 ? (await loadRecipes('private-recipe-data')).map((name) => ({
                       name,
                       isPrivate: true,
                   }))
-                : [];
-            setRecipes([...privateRecipes, ...publicRecipes]);
+                : null;
+
+            setPublicRecipes(loadedPublicRecipes);
+            setPrivateRecipes(loadedPrivateRecipes);
         })();
     }, []);
 
-    const loading = recipes === null;
+    const loading = publicRecipes === null;
 
     return (
         <div className='font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
@@ -82,18 +85,25 @@ export default function RecipePage() {
                     className='flex flex-col w-full gap-[24px] row-start-2 justify-items-center text-center'
                 >
                     {loading ? (
-                        [LOADING]
+                        <div id='Recipes title' className='flex flex-row w-full items-stretch'>
+                            <p className='flex-grow text-3xl md:text-8xl'>{LOADING}</p>
+                        </div>
                     ) : (
                         <>
                             <div id='Recipes title' className='flex flex-row w-full items-stretch'>
                                 <p className='flex-grow text-3xl md:text-8xl'>Recipes</p>
                             </div>
+                            {privateRecipes && (
+                                <div id='Public recipes title' className='flex flex-row w-full items-stretch'>
+                                    <p className='flex-grow text-xl md:text-3xl'>Public</p>
+                                </div>
+                            )}
                             <ul className={listClass}>
-                                {recipes.map((recipe) => (
+                                {publicRecipes.map((recipe) => (
                                     <li key={recipe.name} className={inputClass}>
                                         <a
                                             className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
-                                            href={`recipe?recipename=${recipe.name}&private=${recipe.isPrivate}`}
+                                            href={`recipe?recipename=${recipe.name}&private=false`}
                                             target='_blank'
                                             rel='noopener noreferrer'
                                         >
@@ -102,6 +112,27 @@ export default function RecipePage() {
                                     </li>
                                 ))}
                             </ul>
+                            {privateRecipes && (
+                                <>
+                                    <div id='Private recipes title' className='flex flex-row w-full items-stretch'>
+                                        <p className='flex-grow text-xl md:text-3xl'>Private</p>
+                                    </div>
+                                    <ul className={listClass}>
+                                        {privateRecipes.map((recipe) => (
+                                            <li key={recipe.name} className={inputClass}>
+                                                <a
+                                                    className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
+                                                    href={`recipe?recipename=${recipe.name}&private=true`}
+                                                    target='_blank'
+                                                    rel='noopener noreferrer'
+                                                >
+                                                    {recipe.name}
+                                                </a>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </>
+                            )}
                         </>
                     )}
                 </div>
