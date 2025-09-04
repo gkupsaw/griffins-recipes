@@ -23,6 +23,7 @@ type Recipe = {
 export default function RecipePage() {
     const [publicRecipes, setPublicRecipes] = useState<Recipe[] | null>(null);
     const [privateRecipes, setPrivateRecipes] = useState<Recipe[] | null>(null);
+    const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
         async function loadRecipes(topLevelFolder: string): Promise<string[]> {
@@ -72,10 +73,12 @@ export default function RecipePage() {
 
             setPublicRecipes(loadedPublicRecipes);
             setPrivateRecipes(loadedPrivateRecipes);
+            setUser(user);
         })();
     }, []);
 
     const loading = publicRecipes === null;
+    const authenticated = !!user?.signInDetails;
 
     return (
         <div className='font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
@@ -93,7 +96,7 @@ export default function RecipePage() {
                             <div id='Recipes title' className='flex flex-row w-full items-stretch'>
                                 <p className='flex-grow text-3xl md:text-8xl'>Recipes</p>
                             </div>
-                            {privateRecipes && (
+                            {authenticated && (
                                 <div id='Public recipes title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-xl md:text-3xl'>Public</p>
                                 </div>
@@ -138,13 +141,15 @@ export default function RecipePage() {
                 </div>
             </main>
             <footer className='flex flex-row justify-items-center flex-wrap row-start-3 my-8'>
-                <a
-                    className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                    href='upload'
-                    style={{ width: '6em' }}
-                >
-                    Upload new recipe
-                </a>
+                {authenticated && (
+                    <a
+                        className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                        href='upload'
+                        style={{ width: '6em' }}
+                    >
+                        Upload new recipe
+                    </a>
+                )}
                 <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center text-3xl'
                     href='https://github.com/gkupsaw/griffins-recipes'
