@@ -36,3 +36,7 @@ hr {
 button {
     cursor: pointer;
 }
+
+textarea {
+    field-sizing: content;
+}

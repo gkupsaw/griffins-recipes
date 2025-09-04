@@ -50,6 +50,7 @@ const defaultStepsCount = 1;
 export default function RecipeForm() {
     const [submitting, setSubmitting] = useState(false);
     const [importing, setImporting] = useState(false);
+    const [useMultibox, setUseMultibox] = useState(false);
 
     const [existingRecipes, setExistingRecipes] = useState<string[] | null>(null);
     const [existingRecipeToImport, setExistingRecipeToImport] = useState<string>('');
@@ -373,128 +374,192 @@ export default function RecipeForm() {
                                 />
                             </div>
                             <hr />
-                            <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
-                                <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
-                                    Press <code>Enter</code> on an ingredient or step input to add another input. Or,
-                                    paste multiline input (text separated with a newline) to add multiple items at once.
-                                </p>
-                                <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
-                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Ingredients</p>
-                                    <button
-                                        className={buttonClass}
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            setRecipeState({
-                                                ...recipeState,
-                                                recipeIngredients: [...recipeIngredients, ''],
-                                            });
-                                        }}
-                                    >
-                                        Add ingredient
-                                    </button>
+                            <div id='Multibox' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
+                                <div
+                                    id='Multibox title'
+                                    className='flex flex-row items-center gap-4 w-full justify-start'
+                                >
+                                    <label htmlFor='isPrivate' className='flex-grow text-xl md:text-3xl text-left'>
+                                        Use multiple input boxes for ingredients/steps?
+                                    </label>
                                 </div>
-                                <ul className={listClass}>
-                                    {recipeIngredients.map((ingredient, i) => (
-                                        <li
-                                            key={i}
-                                            className='flex flex-row items-left text-sm/6 text-center text-left'
-                                        >
-                                            <textarea
-                                                value={ingredient}
-                                                placeholder={`Ingredient ${i + 1}`}
-                                                className={inputClass}
-                                                onChange={(e) => {
+                                <div
+                                    id='Multibox input'
+                                    className='flex flex-row items-center gap-4 w-full justify-start'
+                                >
+                                    <p className='text-left'>{useMultibox ? 'Yes' : 'No'}</p>
+                                    <input
+                                        id='isMultibox'
+                                        type='checkbox'
+                                        className='pb-4 cursor-pointer'
+                                        style={{ width: '2em', height: '2em' }}
+                                        onChange={(e) => setUseMultibox(e.target.checked)}
+                                    />
+                                </div>
+                            </div>
+                            <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
+                                {useMultibox ? (
+                                    <>
+                                        <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
+                                            Press <code>Enter</code> on a step/ingredient to add another
+                                            step/ingredient. Or, paste multiline text (separated with a newline) to add
+                                            multiple steps/ingredients at once.
+                                        </p>
+                                        <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
+                                            <p className='flex-grow text-xl md:text-3xl text-center text-left'>
+                                                Ingredients
+                                            </p>
+                                            <button
+                                                className={buttonClass}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     setRecipeState({
                                                         ...recipeState,
-                                                        recipeIngredients: [
-                                                            ...recipeIngredients.slice(0, i),
-                                                            ...e.target.value
-                                                                .split('\n')
-                                                                // Filter out non-ASCII chars
-                                                                .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
-                                                            ...recipeIngredients.slice(i + 1),
-                                                        ],
+                                                        recipeIngredients: [...recipeIngredients, ''],
                                                     });
                                                 }}
-                                            />
-                                            {recipeIngredients.length > 1 && (
-                                                <button
-                                                    className={buttonClass}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setRecipeState({
-                                                            ...recipeState,
-                                                            recipeIngredients: [
-                                                                ...recipeIngredients.slice(0, i),
-                                                                ...recipeIngredients.slice(i + 1),
-                                                            ],
-                                                        });
-                                                    }}
+                                            >
+                                                Add ingredient
+                                            </button>
+                                        </div>
+                                        <ul className={listClass}>
+                                            {recipeIngredients.map((ingredient, i) => (
+                                                <li
+                                                    key={i}
+                                                    className='flex flex-row items-left text-sm/6 text-center text-left'
                                                 >
-                                                    Remove
-                                                </button>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                            <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
-                                <div id='Steps title' className='flex flex-row w-full items-stretch'>
-                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Steps</p>
-                                    <button
-                                        className={buttonClass}
-                                        onClick={(e) => {
-                                            e.preventDefault();
+                                                    <textarea
+                                                        value={ingredient}
+                                                        placeholder={`Ingredient ${i + 1}`}
+                                                        className={inputClass}
+                                                        onChange={(e) => {
+                                                            setRecipeState({
+                                                                ...recipeState,
+                                                                recipeIngredients: [
+                                                                    ...recipeIngredients.slice(0, i),
+                                                                    ...e.target.value
+                                                                        .split('\n')
+                                                                        // Filter out non-ASCII chars
+                                                                        .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
+                                                                    ...recipeIngredients.slice(i + 1),
+                                                                ],
+                                                            });
+                                                        }}
+                                                    />
+                                                    {recipeIngredients.length > 1 && (
+                                                        <button
+                                                            className={buttonClass}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setRecipeState({
+                                                                    ...recipeState,
+                                                                    recipeIngredients: [
+                                                                        ...recipeIngredients.slice(0, i),
+                                                                        ...recipeIngredients.slice(i + 1),
+                                                                    ],
+                                                                });
+                                                            }}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                ) : (
+                                    <textarea
+                                        value={recipeIngredients.join('\n')}
+                                        placeholder='Ingredients'
+                                        className={inputClass}
+                                        onChange={(e) => {
                                             setRecipeState({
                                                 ...recipeState,
-                                                recipeSteps: [...recipeSteps, ''],
+                                                recipeIngredients: e.target.value
+                                                    .split('\n')
+                                                    // Filter out non-ASCII chars
+                                                    .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
                                             });
                                         }}
-                                    >
-                                        Add step
-                                    </button>
-                                </div>
-                                <ul className={listClass}>
-                                    {recipeSteps.map((ingredient, i) => (
-                                        <li key={i} className='flex flex-row text-sm/6 text-center text-left'>
-                                            <textarea
-                                                value={ingredient}
-                                                placeholder={`Step ${i + 1}`}
-                                                className={inputClass}
-                                                onChange={(e) =>
+                                    />
+                                )}
+                            </div>
+                            <div id='Steps' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
+                                {useMultibox ? (
+                                    <>
+                                        <div id='Steps title' className='flex flex-row w-full items-stretch'>
+                                            <p className='flex-grow text-xl md:text-3xl text-center text-left'>Steps</p>
+                                            <button
+                                                className={buttonClass}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
                                                     setRecipeState({
                                                         ...recipeState,
-                                                        recipeSteps: [
-                                                            ...recipeSteps.slice(0, i),
-                                                            ...e.target.value
-                                                                .split('\n')
-                                                                // Filter out non-ASCII chars
-                                                                .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
-                                                            ...recipeSteps.slice(i + 1),
-                                                        ],
-                                                    })
-                                                }
-                                            />
-                                            {recipeSteps.length > 1 && (
-                                                <button
-                                                    className={buttonClass}
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        setRecipeState({
-                                                            ...recipeState,
-                                                            recipeSteps: [
-                                                                ...recipeSteps.slice(0, i),
-                                                                ...recipeSteps.slice(i + 1),
-                                                            ],
-                                                        });
-                                                    }}
-                                                >
-                                                    Remove
-                                                </button>
-                                            )}
-                                        </li>
-                                    ))}
-                                </ul>
+                                                        recipeSteps: [...recipeSteps, ''],
+                                                    });
+                                                }}
+                                            >
+                                                Add step
+                                            </button>
+                                        </div>
+                                        <ul className={listClass}>
+                                            {recipeSteps.map((ingredient, i) => (
+                                                <li key={i} className='flex flex-row text-sm/6 text-center text-left'>
+                                                    <textarea
+                                                        value={ingredient}
+                                                        placeholder={`Step ${i + 1}`}
+                                                        className={inputClass}
+                                                        onChange={(e) =>
+                                                            setRecipeState({
+                                                                ...recipeState,
+                                                                recipeSteps: [
+                                                                    ...recipeSteps.slice(0, i),
+                                                                    ...e.target.value
+                                                                        .split('\n')
+                                                                        // Filter out non-ASCII chars
+                                                                        .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
+                                                                    ...recipeSteps.slice(i + 1),
+                                                                ],
+                                                            })
+                                                        }
+                                                    />
+                                                    {recipeSteps.length > 1 && (
+                                                        <button
+                                                            className={buttonClass}
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                setRecipeState({
+                                                                    ...recipeState,
+                                                                    recipeSteps: [
+                                                                        ...recipeSteps.slice(0, i),
+                                                                        ...recipeSteps.slice(i + 1),
+                                                                    ],
+                                                                });
+                                                            }}
+                                                        >
+                                                            Remove
+                                                        </button>
+                                                    )}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </>
+                                ) : (
+                                    <textarea
+                                        value={recipeSteps.join('\n')}
+                                        placeholder='Steps'
+                                        className={inputClass}
+                                        onChange={(e) => {
+                                            setRecipeState({
+                                                ...recipeState,
+                                                recipeSteps: e.target.value
+                                                    .split('\n')
+                                                    // Filter out non-ASCII chars
+                                                    .map((s) => s.replace(/[^\x00-\x7F]/g, '')),
+                                            });
+                                        }}
+                                    />
+                                )}
                             </div>
                             <div id='Private' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
                                 <div
