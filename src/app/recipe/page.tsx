@@ -66,6 +66,7 @@ export default function RecipePage() {
 
             await getUrl({
                 path: `${topLevelFolder}/${recipeDirName}/image.png`,
+                options: { validateObjectExistence: true },
             })
                 .then(({ url }) => setRecipeImage(url.href))
                 .catch((e) => {
@@ -86,8 +87,6 @@ export default function RecipePage() {
             }
         })();
     }, []);
-
-    console.log(recipeImage);
 
     const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
 
