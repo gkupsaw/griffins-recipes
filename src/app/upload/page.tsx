@@ -785,9 +785,9 @@ export default function RecipeForm() {
                                     Download All
                                 </button>
                                 <button
-                                    className={`bg-${disabled ? 'blue' : 'yellow'}-800 hover:bg-${
-                                        disabled ? 'blue' : 'yellow'
-                                    }-600 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
+                                    className={`bg-${disabled ? 'blue' : 'red'}-900 hover:bg-${
+                                        disabled ? 'blue' : 'red'
+                                    }-700 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
                                     onClick={async (e) => {
                                         e.preventDefault();
                                         if (
@@ -854,7 +854,7 @@ export default function RecipeForm() {
                                         }
                                     }}
                                 >
-                                    Sync recipe list
+                                    Manually sync recipe list
                                 </button>
                                 <button
                                     className='bg-red-900 hover:bg-red-700 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
