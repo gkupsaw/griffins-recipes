@@ -2,7 +2,7 @@
 
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { downloadData } from 'aws-amplify/storage';
+import { downloadData, getUrl } from 'aws-amplify/storage';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -30,7 +30,7 @@ const LOADING = 'Loading...';
 
 export default function RecipePage() {
     const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
-    const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
+    const [recipeImage, setRecipeImage] = useState<string | null>(null);
     const [recipeImageNotFound, setRecipeImageNotFound] = useState<boolean>(false);
     const [isPrivate, setIsPrivate] = useState<boolean>(false);
     const [user, setUser] = useState<AuthUser | null>(null);
@@ -64,13 +64,10 @@ export default function RecipePage() {
                 )
                 .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
 
-            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/image.png` })
-                .result.then(({ body }) =>
-                    body
-                        .blob()
-                        .then((image) => setRecipeImage(image))
-                        .catch((e) => window.alert(`Could not unpack image for recipe ${recipeDirName}: ${e}`))
-                )
+            await getUrl({
+                path: `${topLevelFolder}/${recipeDirName}/image.png`,
+            })
+                .then(({ url }) => setRecipeImage(url.href))
                 .catch((e) => {
                     console.warn(`Could not retrieve image for recipe ${recipeDirName}, using default: ${e}`);
                     setRecipeImageNotFound(true);
@@ -90,6 +87,8 @@ export default function RecipePage() {
         })();
     }, []);
 
+    console.log(recipeImage);
+
     const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
 
     return (
@@ -101,7 +100,7 @@ export default function RecipePage() {
                         <FontAwesomeIcon icon={faImage} style={{ width: 360, height: 360 }} />
                     ) : (
                         <Image
-                            src={recipeImage === null ? defaultRecipeImage : URL.createObjectURL(recipeImage)}
+                            src={recipeImage === null ? defaultRecipeImage : recipeImage}
                             alt='Recipe photo'
                             height={360}
                             width={360}
