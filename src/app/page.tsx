@@ -3,7 +3,7 @@
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import { list } from 'aws-amplify/storage';
+import { downloadData } from 'aws-amplify/storage';
 import { useEffect, useState } from 'react';
 
 const LOADING = 'Loading...';
@@ -17,8 +17,15 @@ const listClass = 'list-inside text-sm/6 text-center sm:text-left justify-items-
 const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p-2 my-1 rounded-sm`;
 
 type Recipe = {
-    readonly name: string;
+    readonly recipeName: string;
+    readonly isPrivate: boolean;
 };
+
+type RecipeMetaData = {
+    readonly isPrivate: boolean;
+};
+
+type TotalRecipeMetaData = Record<string, RecipeMetaData>;
 
 export default function RecipePage() {
     const [publicRecipes, setPublicRecipes] = useState<Recipe[] | null>(null);
@@ -26,26 +33,18 @@ export default function RecipePage() {
     const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
-        async function loadRecipes(topLevelFolder: string): Promise<string[]> {
+        async function loadRecipes(topLevelFolder: string): Promise<Recipe[]> {
             try {
-                const result = await list({
-                    path: `${topLevelFolder}/`,
-                    options: {
-                        listAll: true,
-                        subpathStrategy: {
-                            strategy: 'exclude',
-                            delimiter: '/',
-                        },
-                    },
-                });
-
-                return (
-                    result.excludedSubpaths?.map((recipePath) =>
-                        (recipePath.split(topLevelFolder)[1] ?? '{misformatted recipe name}/').slice(1, -1)
-                    ) ?? []
+                const existingTotalMetaData: TotalRecipeMetaData = JSON.parse(
+                    await (await downloadData({ path: `${topLevelFolder}/metadata.json` }).result).body.text()
                 );
+                return Object.entries(existingTotalMetaData).map(([recipeName, recipeMetaData]) => ({
+                    recipeName,
+                    ...recipeMetaData,
+                }));
             } catch (e) {
-                window.alert(`Could not retrieve recipes: ${e}`);
+                window.alert(`Could not load recipes.`);
+                console.warn(`Could not load existing recipe metadata: ${e}`);
                 return [];
             }
         }
@@ -59,17 +58,8 @@ export default function RecipePage() {
                 console.log(`Could not retrieve current user: ${e}`);
             }
 
-            const loadedPublicRecipes: Recipe[] = (await loadRecipes('recipe-data')).map((name) => ({
-                name,
-                isPrivate: false,
-            }));
-
-            const loadedPrivateRecipes = user?.signInDetails
-                ? (await loadRecipes('private-recipe-data')).map((name) => ({
-                      name,
-                      isPrivate: true,
-                  }))
-                : null;
+            const loadedPublicRecipes = await loadRecipes('recipe-metadata');
+            const loadedPrivateRecipes = user?.signInDetails ? await loadRecipes('private-recipe-metadata') : null;
 
             setPublicRecipes(loadedPublicRecipes);
             setPrivateRecipes(loadedPrivateRecipes);
@@ -103,33 +93,33 @@ export default function RecipePage() {
                             )}
                             <ul className={listClass}>
                                 {publicRecipes.map((recipe) => (
-                                    <li key={recipe.name} className={inputClass}>
+                                    <li key={recipe.recipeName} className={inputClass}>
                                         <a
                                             className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
-                                            href={`recipe?recipename=${recipe.name}&private=false`}
+                                            href={`recipe?recipename=${recipe.recipeName}&private=false`}
                                             target='_blank'
                                             rel='noopener noreferrer'
                                         >
-                                            {recipe.name}
+                                            {recipe.recipeName}
                                         </a>
                                     </li>
                                 ))}
                             </ul>
-                            {privateRecipes && (
+                            {privateRecipes && privateRecipes.length > 0 && (
                                 <>
                                     <div id='Private recipes title' className='flex flex-row w-full items-stretch'>
                                         <p className='flex-grow text-xl md:text-3xl'>Private</p>
                                     </div>
                                     <ul className={listClass}>
                                         {privateRecipes.map((recipe) => (
-                                            <li key={recipe.name} className={inputClass}>
+                                            <li key={recipe.recipeName} className={inputClass}>
                                                 <a
                                                     className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
-                                                    href={`recipe?recipename=${recipe.name}&private=true`}
+                                                    href={`recipe?recipename=${recipe.recipeName}&private=true`}
                                                     target='_blank'
                                                     rel='noopener noreferrer'
                                                 >
-                                                    {recipe.name}
+                                                    {recipe.recipeName}
                                                 </a>
                                             </li>
                                         ))}

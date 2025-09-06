@@ -102,26 +102,15 @@ export default function RecipeForm() {
             return null;
         }
 
-        async function loadExistingRecipes(topLevelFolder: string): Promise<string[]> {
+        async function loadRecipes(topLevelFolder: string): Promise<string[]> {
             try {
-                const result = await list({
-                    path: `${topLevelFolder}/`,
-                    options: {
-                        listAll: true,
-                        subpathStrategy: {
-                            strategy: 'exclude',
-                            delimiter: '/',
-                        },
-                    },
-                });
-
-                return (
-                    result.excludedSubpaths?.map(
-                        (recipePath) => recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ?? '<unknown>'
-                    ) ?? []
+                const existingTotalMetaData: TotalRecipeMetaData = JSON.parse(
+                    await (await downloadData({ path: `${topLevelFolder}/metadata.json` }).result).body.text()
                 );
+                return Object.keys(existingTotalMetaData);
             } catch (e) {
-                window.alert(`Could not retrieve recipes: ${e}`);
+                window.alert(`Could not load recipes.`);
+                console.warn(`Could not load existing recipe metadata: ${e}`);
                 return [];
             }
         }
@@ -176,8 +165,8 @@ export default function RecipeForm() {
             }
 
             setExistingRecipes([
-                ...(await loadExistingRecipes('recipe-data')),
-                ...(await loadExistingRecipes('private-recipe-data')),
+                ...(await loadRecipes('recipe-metadata')),
+                ...(await loadRecipes('private-recipe-metadata')),
             ]);
 
             if (inProgressRecipeData === null) {
@@ -794,6 +783,78 @@ export default function RecipeForm() {
                                     }}
                                 >
                                     Download All
+                                </button>
+                                <button
+                                    className={`bg-${disabled ? 'blue' : 'yellow'}-800 hover:bg-${
+                                        disabled ? 'blue' : 'yellow'
+                                    }-600 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer`}
+                                    onClick={async (e) => {
+                                        e.preventDefault();
+                                        if (
+                                            window.confirm(
+                                                "Sync recipe list displayed on the homepage? You only need to do this if the list isn't displaying new recipes."
+                                            )
+                                        ) {
+                                            async function loadExistingRecipes(
+                                                topLevelFolder: string
+                                            ): Promise<string[]> {
+                                                try {
+                                                    const result = await list({
+                                                        path: `${topLevelFolder}/`,
+                                                        options: {
+                                                            listAll: true,
+                                                            subpathStrategy: {
+                                                                strategy: 'exclude',
+                                                                delimiter: '/',
+                                                            },
+                                                        },
+                                                    });
+
+                                                    return (
+                                                        result.excludedSubpaths?.map(
+                                                            (recipePath) =>
+                                                                recipePath.match(`${topLevelFolder}\/(.*)\/`)?.at(1) ??
+                                                                '<unknown>'
+                                                        ) ?? []
+                                                    );
+                                                } catch (e) {
+                                                    window.alert(`Could not retrieve recipes: ${e}`);
+                                                    return [];
+                                                }
+                                            }
+
+                                            console.log(`Listing all data...`);
+
+                                            const publicListResult = await loadExistingRecipes('recipe-data');
+                                            const privateListResult = await loadExistingRecipes('private-recipe-data');
+
+                                            console.log('Updating public metadata...');
+
+                                            const publicMetaData: TotalRecipeMetaData = publicListResult.reduce(
+                                                (acc, s) => ({ ...acc, [s]: { isPrivate: false } }),
+                                                {}
+                                            );
+                                            uploadData({
+                                                path: 'recipe-metadata/metadata.json',
+                                                data: JSON.stringify(publicMetaData),
+                                            });
+
+                                            console.log('Updating private metadata...');
+
+                                            const privateMetaData: TotalRecipeMetaData = privateListResult.reduce(
+                                                (acc, s) => ({ ...acc, [s]: { isPrivate: true } }),
+                                                {}
+                                            );
+                                            uploadData({
+                                                path: 'private-recipe-metadata/metadata.json',
+                                                data: JSON.stringify(privateMetaData),
+                                            });
+
+                                            console.log('Synchronization complete');
+                                        }
+                                    }}
+                                >
+                                    Sync recipe list
                                 </button>
                                 <button
                                     className='bg-red-900 hover:bg-red-700 font-bold py-2 px-4 rounded inline-flex items-center text-sm cursor-pointer'
