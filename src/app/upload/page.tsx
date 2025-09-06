@@ -65,7 +65,7 @@ export default function RecipeForm() {
 
     const [user, setUser] = useState<AuthUser | null>(null);
 
-    const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
+    const [recipeImage, setRecipeImage] = useState<File | string | null>(null);
 
     const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData>(getDefaultRecipeMetaData());
     const { isPrivate } = recipeMetaData;
@@ -138,15 +138,14 @@ export default function RecipeForm() {
                 )
                 .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
 
-            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/image.png` })
-                .result.then(({ body }) =>
-                    body
-                        .blob()
-                        .then((image) => setRecipeImageFile(new File([image], 'image.png')))
-                        .catch((e) => window.alert(`Could not unpack image for recipe ${recipeDirName}: ${e}`))
-                )
+            await getUrl({
+                path: `${topLevelFolder}/${recipeDirName}/image.png`,
+                options: { validateObjectExistence: true },
+            })
+                .then(({ url }) => setRecipeImage(url.href))
                 .catch((e) => {
-                    console.warn(`Could not retrieve image for recipe ${recipeDirName}: ${e}`);
+                    window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`);
+                    setRecipeImage(null);
                 });
         }
 
@@ -204,16 +203,15 @@ export default function RecipeForm() {
             )
             .catch((e) => window.alert(`Could not retrieve recipe ${existingRecipeToImport}: ${e}`));
 
-        await downloadData({ path: `${topLevelFolder}/${existingRecipeToImport}/image.png` })
-            .result.then(({ body }) =>
-                body
-                    .blob()
-                    .then((blob) => {
-                        setRecipeImageFile(new File([blob], 'image.png'));
-                    })
-                    .catch((e) => window.alert(`Could not unpack image for recipe ${existingRecipeToImport}: ${e}`))
-            )
-            .catch(() => setRecipeImageFile(null));
+        await getUrl({
+            path: `${topLevelFolder}/${existingRecipeToImport}/image.png`,
+            options: { validateObjectExistence: true },
+        })
+            .then(({ url }) => setRecipeImage(url.href))
+            .catch((e) => {
+                window.alert(`Could not retrieve image for recipe ${existingRecipeToImport}: ${e}`);
+                setRecipeImage(null);
+            });
     }
 
     async function handleUpload() {
@@ -259,12 +257,12 @@ export default function RecipeForm() {
             data: JSON.stringify(recipeState),
         });
 
-        if (recipeImageFile !== null) {
+        if (recipeImage !== null && typeof recipeImage === 'object') {
             console.log('Uploading image...');
 
             uploadData({
                 path: recipeImagePath,
-                data: recipeImageFile,
+                data: recipeImage,
             });
         }
 
@@ -347,9 +345,11 @@ export default function RecipeForm() {
                                 }
                                 className='text-center pb-4 wrap-break-word bg-gray-800 p-4 rounded-sm'
                             />
-                            {recipeImageFile ? (
+                            {recipeImage !== null ? (
                                 <Image
-                                    src={URL.createObjectURL(recipeImageFile)}
+                                    src={
+                                        typeof recipeImage === 'string' ? recipeImage : URL.createObjectURL(recipeImage)
+                                    }
                                     alt='Uploaded recipe photo'
                                     height={360}
                                     width={360}
@@ -368,7 +368,7 @@ export default function RecipeForm() {
                                 hidden
                                 onChange={(event) => {
                                     if (event.target.files && event.target.files[0]) {
-                                        setRecipeImageFile(event.target.files[0]);
+                                        setRecipeImage(event.target.files[0]);
                                     }
                                 }}
                             />
@@ -720,7 +720,7 @@ export default function RecipeForm() {
                                         }
 
                                         setRecipeState(getDefaultRecipeData());
-                                        setRecipeImageFile(null);
+                                        setRecipeImage(null);
                                     }}
                                 >
                                     Clear form
