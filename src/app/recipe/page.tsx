@@ -16,7 +16,6 @@ type RecipeData = {
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
     readonly recipeSteps: string[];
-    readonly isPrivate: boolean;
 };
 
 const gray = {
@@ -33,6 +32,7 @@ export default function RecipePage() {
     const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
     const [recipeImage, setRecipeImage] = useState<Blob | null>(null);
     const [recipeImageNotFound, setRecipeImageNotFound] = useState<boolean>(false);
+    const [isPrivate, setIsPrivate] = useState<boolean>(false);
     const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
@@ -44,7 +44,10 @@ export default function RecipePage() {
                 redirect('/');
             }
 
-            const topLevelFolder = searchParams.get('private') === 'true' ? 'private-recipe-data' : 'recipe-data';
+            const privateParam = searchParams.get('private') === 'true';
+            setIsPrivate(privateParam);
+
+            const topLevelFolder = privateParam ? 'private-recipe-data' : 'recipe-data';
 
             await downloadData({ path: `${topLevelFolder}/${recipeDirName}/data.json` })
                 .result.then(({ body }) =>
@@ -141,7 +144,7 @@ export default function RecipePage() {
                         <>
                             <a
                                 className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                                href={`upload?recipename=${recipeData.recipeName}&private=${recipeData.isPrivate}`}
+                                href={`upload?recipename=${recipeData.recipeName}&private=${isPrivate}`}
                                 style={{ width: '6em' }}
                             >
                                 Edit

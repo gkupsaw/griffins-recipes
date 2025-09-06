@@ -17,8 +17,13 @@ type RecipeData = {
     readonly recipeDesc: string;
     readonly recipeIngredients: string[];
     readonly recipeSteps: string[];
+};
+
+type RecipeMetaData = {
     readonly isPrivate: boolean;
 };
+
+type TotalRecipeMetaData = Record<string, RecipeMetaData>;
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -26,6 +31,9 @@ const getDefaultRecipeData = (): RecipeData => ({
     recipeDateMilliseconds: new Date().getTime(),
     recipeIngredients: new Array(defaultIngredientsCount).fill(''),
     recipeSteps: new Array(defaultStepsCount).fill(''),
+});
+
+const getDefaultRecipeMetaData = (): RecipeMetaData => ({
     isPrivate: false,
 });
 
@@ -58,8 +66,12 @@ export default function RecipeForm() {
     const [user, setUser] = useState<AuthUser | null>(null);
 
     const [recipeImageFile, setRecipeImageFile] = useState<File | null>(null);
+
+    const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData>(getDefaultRecipeMetaData());
+    const { isPrivate } = recipeMetaData;
+
     const [recipeState, setRecipeState] = useState<RecipeData>(getDefaultRecipeData());
-    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps, isPrivate } = recipeState;
+    const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps } = recipeState;
 
     const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
@@ -84,7 +96,6 @@ export default function RecipeForm() {
                         recipeDateMilliseconds: inProgressRecipeData.recipeDateMilliseconds ?? recipeDateMilliseconds,
                         recipeIngredients: inProgressRecipeData.recipeIngredients ?? recipeIngredients,
                         recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
-                        isPrivate: inProgressRecipeData.isPrivate ?? isPrivate,
                     };
                 }
             }
@@ -275,6 +286,25 @@ export default function RecipeForm() {
             (isPrivate ? '&private=true' : '');
 
         setRecipeUrl(uploadedRecipeUrl);
+
+        console.log('Updating metadata...');
+
+        const totalMetaDataPath = 'recipe-metadata/metadata.json';
+
+        let existingTotalMetaData: TotalRecipeMetaData;
+        try {
+            existingTotalMetaData = JSON.parse(
+                await (await downloadData({ path: totalMetaDataPath }).result).body.text()
+            );
+        } catch (e) {
+            console.warn(`Could not load existing recipe metadata: ${e}`);
+            existingTotalMetaData = {};
+        }
+
+        uploadData({
+            path: totalMetaDataPath,
+            data: JSON.stringify({ ...existingTotalMetaData, [recipeName]: recipeMetaData }),
+        });
 
         console.log(`Checking if duplicate data for ${directory} needs cleanup...`);
 
@@ -592,7 +622,7 @@ export default function RecipeForm() {
                                         className='pb-4 cursor-pointer'
                                         style={{ width: '2em', height: '2em' }}
                                         onChange={(e) =>
-                                            setRecipeState({ ...recipeState, isPrivate: e.target.checked })
+                                            setRecipeMetaData({ ...recipeMetaData, isPrivate: e.target.checked })
                                         }
                                     />
                                 </div>
