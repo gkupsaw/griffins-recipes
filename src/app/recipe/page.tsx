@@ -9,14 +9,7 @@ import { useEffect, useState } from 'react';
 import defaultRecipeImage from '../img/default.png';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-
-type RecipeData = {
-    readonly recipeDateMilliseconds: number;
-    readonly recipeName: string;
-    readonly recipeDesc: string;
-    readonly recipeIngredients: string[];
-    readonly recipeSteps: string[];
-};
+import { RecipeData } from '../types/recipe/data';
 
 const gray = {
     primary: 'bg-gray-800',

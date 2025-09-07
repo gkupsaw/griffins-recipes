@@ -5,6 +5,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
 import { downloadData } from 'aws-amplify/storage';
 import { useEffect, useState } from 'react';
+import { TotalRecipeMetaData } from './types/recipe/metadata';
 
 const LOADING = 'Loading...';
 
@@ -20,12 +21,6 @@ type Recipe = {
     readonly recipeName: string;
     readonly isPrivate: boolean;
 };
-
-type RecipeMetaData = {
-    readonly isPrivate: boolean;
-};
-
-type TotalRecipeMetaData = Record<string, RecipeMetaData>;
 
 export default function RecipePage() {
     const [publicRecipes, setPublicRecipes] = useState<Recipe[] | null>(null);

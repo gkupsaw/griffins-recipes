@@ -10,21 +10,8 @@ import { downloadData, getUrl, list, remove, uploadData } from 'aws-amplify/stor
 import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
-
-type RecipeData = {
-    readonly recipeDateMilliseconds: number;
-    readonly recipeName: string;
-    readonly recipeDesc: string;
-    readonly recipeIngredients: string[];
-    readonly recipeSteps: string[];
-};
-
-type RecipeMetaData = {
-    readonly isPrivate: boolean;
-    readonly recipeAuthor: string | null;
-};
-
-type TotalRecipeMetaData = Record<string, RecipeMetaData>;
+import { RecipeData } from '../types/recipe/data';
+import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
