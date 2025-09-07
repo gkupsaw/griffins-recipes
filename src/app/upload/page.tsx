@@ -297,10 +297,8 @@ export default function RecipeForm() {
 
         console.log(`Checking if duplicate data for ${directory} needs cleanup...`);
 
-        const otherTopLevelFolder = isPrivate ? 'recipe-data' : 'private-recipe-data';
-        const otherDirectory = `${otherTopLevelFolder}/${recipeDirName}`;
+        const otherDirectory = `${isPrivate ? 'recipe-data' : 'private-recipe-data'}/${recipeDirName}`;
         const otherRecipeDataPath = `${otherDirectory}/data.json`;
-        const otherRecipeImagePath = `${otherDirectory}/image.png`;
 
         const otherRecipeDataExists = await getUrl({
             path: otherRecipeDataPath,
@@ -318,10 +316,29 @@ export default function RecipeForm() {
             }
 
             try {
+                const otherRecipeImagePath = `${otherDirectory}/image.png`;
                 console.log(`Removing ${otherRecipeImagePath}...`);
                 await remove({ path: otherRecipeImagePath });
             } catch (e) {
                 console.warn(`Could not clean up image: ${e}`);
+            }
+
+            try {
+                const otherTotalMetaDataPath = `${
+                    isPrivate ? 'recipe-metadata' : 'private-recipe-metadata'
+                }/metadata.json`;
+                const otherEistingTotalMetaData = JSON.parse(
+                    await (await downloadData({ path: otherTotalMetaDataPath }).result).body.text()
+                );
+                console.log(`Removing metadata for ${recipeName} from ${otherTotalMetaDataPath}...`);
+                delete otherEistingTotalMetaData[recipeName];
+                console.log(otherEistingTotalMetaData);
+                uploadData({
+                    path: otherTotalMetaDataPath,
+                    data: JSON.stringify(otherEistingTotalMetaData),
+                });
+            } catch (e) {
+                console.warn(`Could not clean up existing recipe metadata: ${e}`);
             }
         } else {
             console.log('No duplicate data found');
@@ -860,7 +877,7 @@ export default function RecipeForm() {
                                                 data: JSON.stringify(privateMetaData),
                                             });
 
-                                            console.log('Synchronization complete');
+                                            console.log(`Synchronization complete: `, publicMetaData, privateMetaData);
                                         }
                                     }}
                                 >
