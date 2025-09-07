@@ -252,7 +252,7 @@ export default function RecipeForm() {
             return console.warn(`Rejecting upload for existing recipe: recipeState=${JSON.stringify(recipeState)}`);
         }
 
-        console.log('Uploading data...');
+        console.log(`Uploading data to ${recipeDataPath}...`);
 
         uploadData({
             path: recipeDataPath,
@@ -260,7 +260,7 @@ export default function RecipeForm() {
         });
 
         if (recipeImage !== null && typeof recipeImage === 'object') {
-            console.log('Uploading image...');
+            console.log(`Uploading image to ${recipeImagePath}...`);
 
             uploadData({
                 path: recipeImagePath,
@@ -278,7 +278,7 @@ export default function RecipeForm() {
 
         console.log('Updating metadata...');
 
-        const totalMetaDataPath = 'recipe-metadata/metadata.json';
+        const totalMetaDataPath = `${isPrivate ? 'private-recipe-metadata' : 'recipe-metadata'}/metadata.json`;
 
         let existingTotalMetaData: TotalRecipeMetaData;
         try {
@@ -289,6 +289,8 @@ export default function RecipeForm() {
             console.warn(`Could not load existing recipe metadata: ${e}`);
             existingTotalMetaData = {};
         }
+
+        console.log(`Uploading metadata to ${totalMetaDataPath}...`);
 
         uploadData({
             path: totalMetaDataPath,
@@ -332,7 +334,6 @@ export default function RecipeForm() {
                 );
                 console.log(`Removing metadata for ${recipeName} from ${otherTotalMetaDataPath}...`);
                 delete otherEistingTotalMetaData[recipeName];
-                console.log(otherEistingTotalMetaData);
                 uploadData({
                     path: otherTotalMetaDataPath,
                     data: JSON.stringify(otherEistingTotalMetaData),
