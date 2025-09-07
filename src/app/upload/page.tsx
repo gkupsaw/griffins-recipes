@@ -15,6 +15,7 @@ import { RecipeImageDAO } from '../datastore/recipe/image';
 import { UserDAO } from '../datastore/user/cognito';
 import { RecipeData } from '../types/recipe/data';
 import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
+import { RecipeMetaDataDAO } from '../datastore/recipe/metadata';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -197,7 +198,6 @@ export default function RecipeForm() {
         const recipeDirName = recipeName;
         const topLevelFolder = isPrivate ? 'private-recipe-data' : 'recipe-data';
         const directory = `${topLevelFolder}/${recipeDirName}`;
-        const recipeImagePath = `${directory}/image.png`;
 
         console.log('Checking recipe existence...');
 
@@ -224,24 +224,7 @@ export default function RecipeForm() {
 
         console.log('Updating metadata...');
 
-        const totalMetaDataPath = `${isPrivate ? 'private-recipe-metadata' : 'recipe-metadata'}/metadata.json`;
-
-        let existingTotalMetaData: TotalRecipeMetaData;
-        try {
-            existingTotalMetaData = JSON.parse(
-                await (await downloadData({ path: totalMetaDataPath }).result).body.text()
-            );
-        } catch (e) {
-            console.warn(`Could not load existing recipe metadata: ${e}`);
-            existingTotalMetaData = {};
-        }
-
-        console.log(`Uploading metadata to ${totalMetaDataPath}...`);
-
-        uploadData({
-            path: totalMetaDataPath,
-            data: JSON.stringify({ ...existingTotalMetaData, [recipeName]: recipeMetaData }),
-        });
+        await RecipeMetaDataDAO.add(recipeMetaData, recipeName, isPrivate);
 
         console.log(`Checking if duplicate data for ${directory} needs cleanup...`);
 
@@ -264,22 +247,7 @@ export default function RecipeForm() {
                 console.warn(`Could not clean up image: ${e}`);
             }
 
-            try {
-                const otherTotalMetaDataPath = `${
-                    isPrivate ? 'recipe-metadata' : 'private-recipe-metadata'
-                }/metadata.json`;
-                const otherEistingTotalMetaData = JSON.parse(
-                    await (await downloadData({ path: otherTotalMetaDataPath }).result).body.text()
-                );
-                console.log(`Removing metadata for ${recipeName} from ${otherTotalMetaDataPath}...`);
-                delete otherEistingTotalMetaData[recipeName];
-                uploadData({
-                    path: otherTotalMetaDataPath,
-                    data: JSON.stringify(otherEistingTotalMetaData),
-                });
-            } catch (e) {
-                console.warn(`Could not clean up existing recipe metadata: ${e}`);
-            }
+            await RecipeMetaDataDAO.remove(recipeName, !isPrivate);
         } else {
             console.log('No duplicate data found');
         }
