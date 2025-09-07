@@ -1,4 +1,4 @@
-import { getUrl } from 'aws-amplify/storage';
+import { getUrl, uploadData } from 'aws-amplify/storage';
 
 export const RecipeImageDAO = {
     async getUrl(recipeName: string, isPrivate: boolean): Promise<string> {
@@ -11,5 +11,11 @@ export const RecipeImageDAO = {
         } catch (e) {
             throw new Error(`Could not retrieve image for recipe ${recipeName}: ${e}`);
         }
+    },
+
+    put(recipeImage: File, recipeName: string, isPrivate: boolean): void {
+        const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/data.json`;
+        console.log(`Uploading recipe data to ${path}...`);
+        uploadData({ path, data: recipeImage });
     },
 };

@@ -197,7 +197,6 @@ export default function RecipeForm() {
         const recipeDirName = recipeName;
         const topLevelFolder = isPrivate ? 'private-recipe-data' : 'recipe-data';
         const directory = `${topLevelFolder}/${recipeDirName}`;
-        const recipeDataPath = `${directory}/data.json`;
         const recipeImagePath = `${directory}/image.png`;
 
         console.log('Checking recipe existence...');
@@ -209,20 +208,10 @@ export default function RecipeForm() {
             return console.warn(`Rejecting upload for existing recipe: recipeState=${JSON.stringify(recipeState)}`);
         }
 
-        console.log(`Uploading data to ${recipeDataPath}...`);
-
-        uploadData({
-            path: recipeDataPath,
-            data: JSON.stringify(recipeState),
-        });
+        RecipeDataDAO.put(recipeState, isPrivate);
 
         if (recipeImage !== null && typeof recipeImage === 'object') {
-            console.log(`Uploading image to ${recipeImagePath}...`);
-
-            uploadData({
-                path: recipeImagePath,
-                data: recipeImage,
-            });
+            RecipeImageDAO.put(recipeImage, recipeName, isPrivate);
         }
 
         const uploadedRecipeUrl =

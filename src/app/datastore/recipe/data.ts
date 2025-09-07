@@ -1,5 +1,5 @@
 import { RecipeData } from './../../types/recipe/data';
-import { downloadData, getUrl } from 'aws-amplify/storage';
+import { downloadData, getUrl, uploadData } from 'aws-amplify/storage';
 
 export const RecipeDataDAO = {
     async get(recipeName: string, isPrivate: boolean): Promise<RecipeData> {
@@ -25,5 +25,11 @@ export const RecipeDataDAO = {
         } catch {
             return false;
         }
+    },
+
+    put(recipeData: RecipeData, isPrivate: boolean): void {
+        const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeData.recipeName}/data.json`;
+        console.log(`Uploading recipe data to ${path}...`);
+        uploadData({ path, data: JSON.stringify(recipeData) });
     },
 };
