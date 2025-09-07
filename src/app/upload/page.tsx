@@ -644,6 +644,7 @@ export default function RecipeForm() {
                                         }
 
                                         setRecipeState(getDefaultRecipeData());
+                                        setRecipeMetaData(getDefaultRecipeMetaData());
                                         setRecipeImage(null);
                                     }}
                                 >
