@@ -6,6 +6,7 @@ import { AuthUser } from 'aws-amplify/auth';
 import { useEffect, useState } from 'react';
 import { RecipeMetaDataDAO } from './datastore/recipe/metadata';
 import { UserDAO } from './datastore/user/cognito';
+import { RecipeMetaData } from './types/recipe/metadata';
 
 const LOADING = 'Loading...';
 
@@ -14,30 +15,33 @@ const gray = {
     secondary: 'bg-gray-500',
 };
 
-const listClass = 'list-inside text-sm/6 text-center sm:text-left justify-items-center gap-[4px] flex flex-col';
+const listClass = 'list-inside text-center justify-items-center gap-[4px] flex flex-col';
 const inputClass = `text-sm/6 text-center justify-items-center ${gray.primary} p-2 my-1 rounded-sm`;
 
 type Recipe = {
     readonly recipeName: string;
-    readonly isPrivate: boolean;
+    readonly recipeMetaData: RecipeMetaData;
 };
 
 export default function RecipePage() {
-    const [publicRecipes, setPublicRecipes] = useState<Recipe[] | null>(null);
-    const [privateRecipes, setPrivateRecipes] = useState<Recipe[] | null>(null);
+    const [publicRecipes, setPublicRecipes] = useState<Record<string, Recipe[]> | null>(null);
+    const [privateRecipes, setPrivateRecipes] = useState<Record<string, Recipe[]> | null>(null);
     const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
         (async () => {
             const currentUser = await UserDAO.getCurrentUser();
 
-            async function loadRecipes(isPrivate: boolean): Promise<Recipe[]> {
-                return Object.entries(await RecipeMetaDataDAO.getAll(isPrivate)).map(
-                    ([recipeName, recipeMetaData]) => ({
+            async function loadRecipes(isPrivate: boolean): Promise<Record<string, Recipe[]>> {
+                return Object.entries(await RecipeMetaDataDAO.getAll(isPrivate))
+                    .map(([recipeName, recipeMetaData]) => ({
                         recipeName,
-                        ...recipeMetaData,
-                    })
-                );
+                        recipeMetaData,
+                    }))
+                    .reduce((acc: Record<string, Recipe[]>, recipe) => {
+                        const author = recipe.recipeMetaData.recipeAuthor ?? 'Misc';
+                        return { ...acc, [author]: [...(acc[author] ?? []), recipe] };
+                    }, {});
             }
 
             await loadRecipes(false)
@@ -85,36 +89,56 @@ export default function RecipePage() {
                                 </div>
                             )}
                             <ul className={listClass}>
-                                {publicRecipes.map((recipe) => (
-                                    <li key={recipe.recipeName} className={inputClass}>
-                                        <a
-                                            className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
-                                            href={`recipe?recipename=${recipe.recipeName}&private=false`}
-                                            target='_blank'
-                                            rel='noopener noreferrer'
+                                {Object.entries(publicRecipes).map(([author, recipes]) => (
+                                    <div key={author}>
+                                        <div
+                                            id='Public author title'
+                                            className='flex flex-row w-full items-stretch mb-4'
                                         >
-                                            {recipe.recipeName}
-                                        </a>
-                                    </li>
-                                ))}
-                            </ul>
-                            {privateRecipes && privateRecipes.length > 0 && (
-                                <>
-                                    <div id='Private recipes title' className='flex flex-row w-full items-stretch'>
-                                        <p className='flex-grow text-xl md:text-3xl'>Private</p>
-                                    </div>
-                                    <ul className={listClass}>
-                                        {privateRecipes.map((recipe) => (
+                                            <p className='flex-grow text-2xl'>{author}</p>
+                                        </div>
+                                        {recipes.map((recipe) => (
                                             <li key={recipe.recipeName} className={inputClass}>
                                                 <a
                                                     className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
-                                                    href={`recipe?recipename=${recipe.recipeName}&private=true`}
+                                                    href={`recipe?recipename=${recipe.recipeName}&private=false`}
                                                     target='_blank'
                                                     rel='noopener noreferrer'
                                                 >
                                                     {recipe.recipeName}
                                                 </a>
                                             </li>
+                                        ))}
+                                    </div>
+                                ))}
+                            </ul>
+                            {privateRecipes && (
+                                <>
+                                    <div id='Private recipes title' className='flex flex-row w-full items-stretch'>
+                                        <p className='flex-grow text-xl md:text-3xl'>Private</p>
+                                    </div>
+                                    <ul className={listClass}>
+                                        {Object.entries(privateRecipes).map(([author, recipes]) => (
+                                            <div key={author}>
+                                                <div
+                                                    id='Public author title'
+                                                    className='flex flex-row w-full items-stretch mb-4'
+                                                >
+                                                    <p className='flex-grow text-2xl text-center'>{author}</p>
+                                                </div>
+                                                {recipes.map((recipe) => (
+                                                    <li key={recipe.recipeName} className={inputClass}>
+                                                        <a
+                                                            className='hover:underline hover:underline-offset-4 text-center text-xl p-8'
+                                                            href={`recipe?recipename=${recipe.recipeName}&private=true`}
+                                                            target='_blank'
+                                                            rel='noopener noreferrer'
+                                                        >
+                                                            {recipe.recipeName}
+                                                        </a>
+                                                    </li>
+                                                ))}
+                                            </div>
                                         ))}
                                     </ul>
                                 </>
