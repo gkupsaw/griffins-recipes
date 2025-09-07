@@ -228,24 +228,10 @@ export default function RecipeForm() {
 
         console.log(`Checking if duplicate data for ${directory} needs cleanup...`);
 
-        const otherDirectory = `${isPrivate ? 'recipe-data' : 'private-recipe-data'}/${recipeDirName}`;
-        const otherRecipeDataPath = `${otherDirectory}/data.json`;
-
         if (await RecipeDataDAO.exists(recipeName, !isPrivate)) {
-            try {
-                console.log(`Removing ${otherRecipeDataPath}...`);
-                await remove({ path: otherRecipeDataPath });
-            } catch (e) {
-                console.error(`Could not clean up data: ${e}`);
-            }
+            RecipeDataDAO.delete(recipeName, !isPrivate);
 
-            try {
-                const otherRecipeImagePath = `${otherDirectory}/image.png`;
-                console.log(`Removing ${otherRecipeImagePath}...`);
-                await remove({ path: otherRecipeImagePath });
-            } catch (e) {
-                console.warn(`Could not clean up image: ${e}`);
-            }
+            RecipeImageDAO.delete(recipeName, !isPrivate);
 
             await RecipeMetaDataDAO.remove(recipeName, !isPrivate);
         } else {

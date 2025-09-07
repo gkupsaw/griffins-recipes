@@ -1,10 +1,14 @@
 import { RecipeData } from './../../types/recipe/data';
-import { downloadData, getUrl, uploadData } from 'aws-amplify/storage';
+import { downloadData, getUrl, remove, uploadData } from 'aws-amplify/storage';
 
 export const RecipeDataDAO = {
+    getDataPath(recipeName: string, isPrivate: boolean): string {
+        return `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/data.json`;
+    },
+
     async get(recipeName: string, isPrivate: boolean): Promise<RecipeData> {
         try {
-            const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/data.json`;
+            const path = this.getDataPath(recipeName, isPrivate);
             console.log(`Loading recipe at ${path}...`);
 
             const { body } = await downloadData({ path }).result;
@@ -17,7 +21,7 @@ export const RecipeDataDAO = {
 
     async exists(recipeName: string, isPrivate: boolean): Promise<boolean> {
         try {
-            const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/data.json`;
+            const path = this.getDataPath(recipeName, isPrivate);
             console.log(`Checking recipe at ${path}...`);
 
             await getUrl({ path, options: { validateObjectExistence: true } });
@@ -28,8 +32,18 @@ export const RecipeDataDAO = {
     },
 
     put(recipeData: RecipeData, isPrivate: boolean): void {
-        const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeData.recipeName}/data.json`;
+        const path = this.getDataPath(recipeData.recipeName, isPrivate);
         console.log(`Uploading recipe data to ${path}...`);
         uploadData({ path, data: JSON.stringify(recipeData) });
+    },
+
+    async delete(recipeName: string, isPrivate: boolean): Promise<void> {
+        try {
+            const path = this.getDataPath(recipeName, isPrivate);
+            console.log(`Deleting data at ${path}...`);
+            await remove({ path });
+        } catch (e) {
+            console.warn(`Could not delete data: ${e}`);
+        }
     },
 };
