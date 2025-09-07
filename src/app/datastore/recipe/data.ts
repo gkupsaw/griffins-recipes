@@ -1,5 +1,5 @@
 import { RecipeData } from './../../types/recipe/data';
-import { downloadData } from 'aws-amplify/storage';
+import { downloadData, getUrl } from 'aws-amplify/storage';
 
 export const RecipeDataDAO = {
     async get(recipeName: string, isPrivate: boolean): Promise<RecipeData> {
@@ -12,6 +12,18 @@ export const RecipeDataDAO = {
             return parsedRecipeData;
         } catch (e) {
             throw new Error(`Could not retrieve recipe ${recipeName}: ${e}`);
+        }
+    },
+
+    async exists(recipeName: string, isPrivate: boolean): Promise<boolean> {
+        try {
+            const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/data.json`;
+            console.log(`Checking recipe at ${path}...`);
+
+            await getUrl({ path, options: { validateObjectExistence: true } });
+            return true;
+        } catch {
+            return false;
         }
     },
 };

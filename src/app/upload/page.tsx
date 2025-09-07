@@ -6,15 +6,15 @@ import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser } from 'aws-amplify/auth';
-import { downloadData, getUrl, list, remove, uploadData } from 'aws-amplify/storage';
+import { downloadData, list, remove, uploadData } from 'aws-amplify/storage';
 import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { RecipeDataDAO } from '../datastore/recipe/data';
+import { RecipeImageDAO } from '../datastore/recipe/image';
 import { UserDAO } from '../datastore/user/cognito';
 import { RecipeData } from '../types/recipe/data';
 import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
-import { RecipeDataDAO } from '../datastore/recipe/data';
-import { RecipeImageDAO } from '../datastore/recipe/image';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -202,14 +202,10 @@ export default function RecipeForm() {
 
         console.log('Checking recipe existence...');
 
-        const recipeDataExists = await getUrl({
-            path: recipeDataPath,
-            options: { validateObjectExistence: true },
-        })
-            .then(() => true)
-            .catch(() => false);
-
-        if (recipeDataExists && !window.confirm('Recipe already exists, would you like to overwrite it?')) {
+        if (
+            (await RecipeDataDAO.exists(recipeName, isPrivate)) &&
+            !window.confirm('Recipe already exists, would you like to overwrite it?')
+        ) {
             return console.warn(`Rejecting upload for existing recipe: recipeState=${JSON.stringify(recipeState)}`);
         }
 
@@ -263,14 +259,7 @@ export default function RecipeForm() {
         const otherDirectory = `${isPrivate ? 'recipe-data' : 'private-recipe-data'}/${recipeDirName}`;
         const otherRecipeDataPath = `${otherDirectory}/data.json`;
 
-        const otherRecipeDataExists = await getUrl({
-            path: otherRecipeDataPath,
-            options: { validateObjectExistence: true },
-        })
-            .then(() => true)
-            .catch(() => false);
-
-        if (otherRecipeDataExists) {
+        if (await RecipeDataDAO.exists(recipeName, !isPrivate)) {
             try {
                 console.log(`Removing ${otherRecipeDataPath}...`);
                 await remove({ path: otherRecipeDataPath });
