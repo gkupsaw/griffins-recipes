@@ -2,12 +2,11 @@ import { getUrl } from 'aws-amplify/storage';
 
 export const RecipeImageDAO = {
     async getUrl(recipeName: string, isPrivate: boolean): Promise<string> {
-        const topLevelFolder = isPrivate ? 'private-recipe-data' : 'recipe-data';
         try {
-            const { url } = await getUrl({
-                path: `${topLevelFolder}/${recipeName}/image.png`,
-                options: { validateObjectExistence: true },
-            });
+            const path = `${isPrivate ? 'private-recipe-data' : 'recipe-data'}/${recipeName}/image.png`;
+            console.log(`Loading recipe image at ${path}...`);
+
+            const { url } = await getUrl({ path, options: { validateObjectExistence: true } });
             return url.href;
         } catch (e) {
             throw new Error(`Could not retrieve image for recipe ${recipeName}: ${e}`);

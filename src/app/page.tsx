@@ -3,9 +3,8 @@
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
-import { downloadData } from 'aws-amplify/storage';
 import { useEffect, useState } from 'react';
-import { TotalRecipeMetaData } from './types/recipe/metadata';
+import { RecipeMetaDataDAO } from './datastore/recipe/metadata';
 
 const LOADING = 'Loading...';
 
@@ -28,22 +27,6 @@ export default function RecipePage() {
     const [user, setUser] = useState<AuthUser | null>(null);
 
     useEffect(() => {
-        async function loadRecipes(topLevelFolder: string): Promise<Recipe[]> {
-            try {
-                const existingTotalMetaData: TotalRecipeMetaData = JSON.parse(
-                    await (await downloadData({ path: `${topLevelFolder}/metadata.json` }).result).body.text()
-                );
-                return Object.entries(existingTotalMetaData).map(([recipeName, recipeMetaData]) => ({
-                    recipeName,
-                    ...recipeMetaData,
-                }));
-            } catch (e) {
-                window.alert(`Could not load recipes.`);
-                console.warn(`Could not load existing recipe metadata: ${e}`);
-                return [];
-            }
-        }
-
         (async () => {
             let user: AuthUser | null = null;
             try {
@@ -53,11 +36,31 @@ export default function RecipePage() {
                 console.log(`Could not retrieve current user: ${e}`);
             }
 
-            const loadedPublicRecipes = await loadRecipes('recipe-metadata');
-            const loadedPrivateRecipes = user?.signInDetails ? await loadRecipes('private-recipe-metadata') : null;
+            async function loadRecipes(isPrivate: boolean): Promise<Recipe[]> {
+                return Object.entries(await RecipeMetaDataDAO.getAll(isPrivate)).map(
+                    ([recipeName, recipeMetaData]) => ({
+                        recipeName,
+                        ...recipeMetaData,
+                    })
+                );
+            }
 
-            setPublicRecipes(loadedPublicRecipes);
-            setPrivateRecipes(loadedPrivateRecipes);
+            await loadRecipes(false)
+                .then(setPublicRecipes)
+                .catch((e) => {
+                    window.alert(`Could not load public recipes.`);
+                    console.warn(e);
+                });
+
+            if (user?.signInDetails) {
+                await loadRecipes(true)
+                    .then(setPrivateRecipes)
+                    .catch((e) => {
+                        window.alert(`Could not load private recipes.`);
+                        console.warn(e);
+                    });
+            }
+
             setUser(user);
         })();
     }, []);
