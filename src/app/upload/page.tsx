@@ -176,6 +176,10 @@ export default function RecipeForm() {
                 console.warn(e);
                 setRecipeImage(null);
             });
+
+        await RecipeMetaDataDAO.get(existingRecipeToImport, privateParam)
+            .then(setRecipeMetaData)
+            .catch(window.alert);
     }
 
     async function handleUpload() {

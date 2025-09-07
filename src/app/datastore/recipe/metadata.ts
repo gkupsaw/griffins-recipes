@@ -8,6 +8,21 @@ export const RecipeMetaDataDAO = {
         return `${isPrivate ? 'private-recipe-metadata' : 'recipe-metadata'}/metadata.json`;
     },
 
+    async get(recipeName: string, isPrivate: boolean): Promise<RecipeMetaData> {
+        let recipeMetaData = null;
+        try {
+            recipeMetaData = (await this.getAll(isPrivate))[recipeName];
+        } catch (e) {
+            console.warn(`Could not retrieve recipe metadata: ${e}`);
+        }
+
+        if (!recipeMetaData) {
+            throw new Error('Could not retrieve recipe metadata');
+        }
+
+        return recipeMetaData;
+    },
+
     async getAll(isPrivate: boolean): Promise<TotalRecipeMetaData> {
         try {
             const path = this.getMetaDataPath(isPrivate);
