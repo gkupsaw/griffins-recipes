@@ -3,15 +3,15 @@
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
+import { AuthUser } from 'aws-amplify/auth';
 import Image from 'next/image';
 import { redirect } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { RecipeDataDAO } from '../datastore/recipe/data';
 import { RecipeImageDAO } from '../datastore/recipe/image';
+import { UserDAO } from '../datastore/user/cognito';
 import defaultRecipeImage from '../img/default.png';
 import { RecipeData } from '../types/recipe/data';
-import { UserDAO } from '../datastore/user/cognito';
 
 const gray = {
     primary: 'bg-gray-800',

@@ -5,14 +5,16 @@ import '@aws-amplify/ui-react/styles.css';
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { faImage } from '@fortawesome/free-regular-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
+import { AuthUser } from 'aws-amplify/auth';
 import { downloadData, getUrl, list, remove, uploadData } from 'aws-amplify/storage';
 import JSZip from 'jszip';
 import Image from 'next/image';
 import { useEffect, useState } from 'react';
+import { UserDAO } from '../datastore/user/cognito';
 import { RecipeData } from '../types/recipe/data';
 import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
-import { UserDAO } from '../datastore/user/cognito';
+import { RecipeDataDAO } from '../datastore/recipe/data';
+import { RecipeImageDAO } from '../datastore/recipe/image';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -108,7 +110,7 @@ export default function RecipeForm() {
         async function loadRecipeIfInUrl() {
             const searchParams = new URLSearchParams(document.location.search);
             const recipeDirName = searchParams.get('recipename');
-            const topLevelFolder = searchParams.get('private') === 'true' ? 'private-recipe-data' : 'recipe-data';
+            const privateParam = searchParams.get('private') === 'true';
 
             if (recipeDirName === null) {
                 return console.log('No recipe params in URL');
@@ -116,25 +118,14 @@ export default function RecipeForm() {
 
             console.log('Found recipe params in URL, attempting download');
 
-            await downloadData({ path: `${topLevelFolder}/${recipeDirName}/data.json` })
-                .result.then(({ body }) =>
-                    body
-                        .text()
-                        .then((text) => {
-                            const parsedRecipeData: RecipeData = JSON.parse(text);
-                            setRecipeState(parsedRecipeData);
-                        })
-                        .catch((e) => window.alert(`Could not unpack recipe ${recipeDirName}: ${e}`))
-                )
-                .catch((e) => window.alert(`Could not retrieve recipe ${recipeDirName}: ${e}`));
+            await RecipeDataDAO.get(recipeDirName, privateParam)
+                .then(setRecipeState)
+                .catch(window.alert);
 
-            await getUrl({
-                path: `${topLevelFolder}/${recipeDirName}/image.png`,
-                options: { validateObjectExistence: true },
-            })
-                .then(({ url }) => setRecipeImage(url.href))
+            await RecipeImageDAO.getUrl(recipeDirName, privateParam)
+                .then(setRecipeImage)
                 .catch((e) => {
-                    window.alert(`Could not retrieve image for recipe ${recipeDirName}: ${e}`);
+                    console.warn(e);
                     setRecipeImage(null);
                 });
         }
@@ -172,31 +163,16 @@ export default function RecipeForm() {
             return window.alert('No recipe name provided');
         }
 
-        const topLevelFolder = ['y', 'Y', 'yes', 'Yes'].includes(
-            window.prompt('Is this recipe private? (Yes/No)') ?? ''
-        )
-            ? 'private-recipe-data'
-            : 'recipe-data';
+        const privateParam = ['y', 'Y', 'yes', 'Yes'].includes(window.prompt('Is this recipe private? (Yes/No)') ?? '');
 
-        await downloadData({ path: `${topLevelFolder}/${existingRecipeToImport}/data.json` })
-            .result.then(({ body }) =>
-                body
-                    .text()
-                    .then((text) => {
-                        const parsedRecipeData: RecipeData = JSON.parse(text);
-                        setRecipeState(parsedRecipeData);
-                    })
-                    .catch((e) => window.alert(`Could not unpack recipe ${existingRecipeToImport}: ${e}`))
-            )
-            .catch((e) => window.alert(`Could not retrieve recipe ${existingRecipeToImport}: ${e}`));
+        await RecipeDataDAO.get(existingRecipeToImport, privateParam)
+            .then(setRecipeState)
+            .catch(window.alert);
 
-        await getUrl({
-            path: `${topLevelFolder}/${existingRecipeToImport}/image.png`,
-            options: { validateObjectExistence: true },
-        })
-            .then(({ url }) => setRecipeImage(url.href))
+        await RecipeImageDAO.getUrl(existingRecipeToImport, privateParam)
+            .then(setRecipeImage)
             .catch((e) => {
-                window.alert(`Could not retrieve image for recipe ${existingRecipeToImport}: ${e}`);
+                console.warn(e);
                 setRecipeImage(null);
             });
     }
