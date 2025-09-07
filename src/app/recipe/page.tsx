@@ -11,6 +11,7 @@ import { RecipeDataDAO } from '../datastore/recipe/data';
 import { RecipeImageDAO } from '../datastore/recipe/image';
 import defaultRecipeImage from '../img/default.png';
 import { RecipeData } from '../types/recipe/data';
+import { UserDAO } from '../datastore/user/cognito';
 
 const gray = {
     primary: 'bg-gray-800',
@@ -56,13 +57,7 @@ export default function RecipePage() {
         loadData();
 
         (async () => {
-            try {
-                setUser(await getCurrentUser());
-                console.log('Signed in');
-            } catch (e) {
-                console.log(`Could not retrieve current user: ${e}`);
-                return;
-            }
+            setUser(await UserDAO.getCurrentUser());
         })();
     }, []);
 
@@ -116,7 +111,7 @@ export default function RecipePage() {
                             ))}
                         </ul>
                     </div>
-                    {recipeData && user?.signInDetails && (
+                    {recipeData && UserDAO.isAuthenticated(user) && (
                         <>
                             <a
                                 className='flex-1 hover:underline hover:underline-offset-4 text-center'

@@ -2,9 +2,10 @@
 
 import { faGithub } from '@fortawesome/free-brands-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { AuthUser, getCurrentUser } from 'aws-amplify/auth';
+import { AuthUser } from 'aws-amplify/auth';
 import { useEffect, useState } from 'react';
 import { RecipeMetaDataDAO } from './datastore/recipe/metadata';
+import { UserDAO } from './datastore/user/cognito';
 
 const LOADING = 'Loading...';
 
@@ -28,13 +29,7 @@ export default function RecipePage() {
 
     useEffect(() => {
         (async () => {
-            let user: AuthUser | null = null;
-            try {
-                user = await getCurrentUser();
-                console.log('Signed in');
-            } catch (e) {
-                console.log(`Could not retrieve current user: ${e}`);
-            }
+            const currentUser = await UserDAO.getCurrentUser();
 
             async function loadRecipes(isPrivate: boolean): Promise<Recipe[]> {
                 return Object.entries(await RecipeMetaDataDAO.getAll(isPrivate)).map(
@@ -52,7 +47,7 @@ export default function RecipePage() {
                     console.warn(e);
                 });
 
-            if (user?.signInDetails) {
+            if (UserDAO.isAuthenticated(currentUser)) {
                 await loadRecipes(true)
                     .then(setPrivateRecipes)
                     .catch((e) => {
@@ -61,12 +56,12 @@ export default function RecipePage() {
                     });
             }
 
-            setUser(user);
+            setUser(currentUser);
         })();
     }, []);
 
     const loading = publicRecipes === null;
-    const authenticated = !!user?.signInDetails;
+    const authenticated = UserDAO.isAuthenticated(user);
 
     return (
         <div className='font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>

@@ -12,6 +12,7 @@ import Image from 'next/image';
 import { useEffect, useState } from 'react';
 import { RecipeData } from '../types/recipe/data';
 import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
+import { UserDAO } from '../datastore/user/cognito';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -144,21 +145,18 @@ export default function RecipeForm() {
                 setRecipeState(inProgressRecipeData);
             }
 
-            try {
-                setUser(await getCurrentUser());
-                console.log('Signed in');
-            } catch (e) {
-                console.log(`Could not retrieve current user: ${e}`);
-                return;
-            }
+            const currentUser = await UserDAO.getCurrentUser();
+            setUser(currentUser);
 
-            setExistingRecipes([
-                ...(await loadRecipes('recipe-metadata')),
-                ...(await loadRecipes('private-recipe-metadata')),
-            ]);
+            if (UserDAO.isAuthenticated(currentUser)) {
+                setExistingRecipes([
+                    ...(await loadRecipes('recipe-metadata')),
+                    ...(await loadRecipes('private-recipe-metadata')),
+                ]);
 
-            if (inProgressRecipeData === null) {
-                await loadRecipeIfInUrl();
+                if (inProgressRecipeData === null) {
+                    await loadRecipeIfInUrl();
+                }
             }
         })();
     }, []);
