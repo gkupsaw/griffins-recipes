@@ -21,6 +21,7 @@ type RecipeData = {
 
 type RecipeMetaData = {
     readonly isPrivate: boolean;
+    readonly recipeAuthor: string | null;
 };
 
 type TotalRecipeMetaData = Record<string, RecipeMetaData>;
@@ -35,6 +36,7 @@ const getDefaultRecipeData = (): RecipeData => ({
 
 const getDefaultRecipeMetaData = (): RecipeMetaData => ({
     isPrivate: false,
+    recipeAuthor: null,
 });
 
 // For simplicity and ease of querying I'm using the recipe name as the folder ID
@@ -402,6 +404,14 @@ export default function RecipeForm() {
                                     value={recipeDesc}
                                     placeholder='Recipe description'
                                     onChange={(e) => setRecipeState({ ...recipeState, recipeDesc: e.target.value })}
+                                    className={inputClass}
+                                />
+                                <textarea
+                                    value={recipeDesc}
+                                    placeholder='Recipe author'
+                                    onChange={(e) =>
+                                        setRecipeMetaData({ ...recipeMetaData, recipeAuthor: e.target.value })
+                                    }
                                     className={inputClass}
                                 />
                             </div>
