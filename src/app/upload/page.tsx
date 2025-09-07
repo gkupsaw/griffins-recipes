@@ -70,7 +70,7 @@ export default function RecipeForm() {
     const [recipeImage, setRecipeImage] = useState<File | string | null>(null);
 
     const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData>(getDefaultRecipeMetaData());
-    const { isPrivate } = recipeMetaData;
+    const { isPrivate, recipeAuthor } = recipeMetaData;
 
     const [recipeState, setRecipeState] = useState<RecipeData>(getDefaultRecipeData());
     const { recipeName, recipeDesc, recipeDateMilliseconds, recipeIngredients, recipeSteps } = recipeState;
@@ -424,10 +424,13 @@ export default function RecipeForm() {
                                     className={inputClass}
                                 />
                                 <textarea
-                                    value={recipeDesc}
+                                    value={recipeAuthor ?? ''}
                                     placeholder='Recipe author'
-                                    onChange={(e) =>
-                                        setRecipeMetaData({ ...recipeMetaData, recipeAuthor: e.target.value })
+                                    onChange={({ target: { value } }) =>
+                                        setRecipeMetaData({
+                                            ...recipeMetaData,
+                                            recipeAuthor: value.length > 0 ? value : null,
+                                        })
                                     }
                                     className={inputClass}
                                 />
