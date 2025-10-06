@@ -12,6 +12,8 @@ import { RecipeImageDAO } from '../datastore/recipe/image';
 import { UserDAO } from '../datastore/user/cognito';
 import defaultRecipeImage from '../img/default.png';
 import { RecipeData } from '../types/recipe/data';
+import { RecipeMetaDataDAO } from '../datastore/recipe/metadata';
+import { RecipeMetaData } from '../types/recipe/metadata';
 
 const gray = {
     primary: 'bg-gray-800',
@@ -25,6 +27,7 @@ const LOADING = 'Loading...';
 
 export default function RecipePage() {
     const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
+    const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData | null>(null);
     const [recipeImage, setRecipeImage] = useState<string | null>(null);
     const [recipeImageNotFound, setRecipeImageNotFound] = useState<boolean>(false);
     const [isPrivate, setIsPrivate] = useState<boolean>(false);
@@ -46,6 +49,10 @@ export default function RecipePage() {
                 .then(setRecipeData)
                 .catch(window.alert);
 
+            await RecipeMetaDataDAO.get(recipeName, privateParam)
+                .then(setRecipeMetaData)
+                .catch(window.alert);
+
             await RecipeImageDAO.getUrl(recipeName, privateParam)
                 .then(setRecipeImage)
                 .catch((e) => {
@@ -61,7 +68,7 @@ export default function RecipePage() {
         })();
     }, []);
 
-    const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null;
+    const loading = (recipeImage === null && !recipeImageNotFound) || recipeData === null || recipeMetaData === null;
 
     return (
         <div className='font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20'>
@@ -81,10 +88,11 @@ export default function RecipePage() {
                         />
                     )}
                 </div>
-                <div id='Content' className='flex w-full flex-col gap-[8px] row-start-2 items-center'>
+                <div id='Content' className='flex w-full flex-col row-start-2 items-center'>
                     <p className='text-3xl w-full text-left'>
                         Born on {loading ? LOADING : new Date(recipeData.recipeDateMilliseconds).toLocaleDateString()}
                     </p>
+                    {recipeMetaData?.recipeAuthor && <p className={inputClass}>{recipeMetaData.recipeAuthor}</p>}
                     <p className={inputClass}>{loading ? LOADING : recipeData.recipeDesc}</p>
                     <hr />
                     <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
