@@ -44,6 +44,7 @@ const gray = {
 const listClass = 'w-full list-inside list-decimal text-sm/6 text-center sm:text-left';
 const buttonClass = `hover:${gray.secondary} text-white px-2 rounded-xs transition duration-300 ease-in-out`;
 const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
+const settingClass = `text-l text-center text-left ${gray.primary} p-2 my-1 rounded-sm`;
 
 const defaultIngredientsCount = 1;
 const defaultStepsCount = 1;
@@ -323,7 +324,7 @@ export default function RecipeForm() {
                                 />
                                 <textarea
                                     value={recipeAuthor ?? ''}
-                                    placeholder='Recipe author'
+                                    placeholder='Recipe author (optional)'
                                     onChange={({ target: { value } }) =>
                                         setRecipeMetaData({
                                             ...recipeMetaData,
@@ -334,35 +335,50 @@ export default function RecipeForm() {
                                 />
                             </div>
                             <hr />
-                            <div id='Multibox' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
+                            <div id='Settings' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
                                 <div
-                                    id='Multibox title'
+                                    id='Settings title'
                                     className='flex flex-row items-center gap-4 w-full justify-start'
                                 >
-                                    <label htmlFor='isPrivate' className='flex-grow text-xl md:text-3xl text-left'>
-                                        Use multiple input boxes for ingredients/steps?
-                                    </label>
+                                    <p className='flex-grow text-xl md:text-3xl text-center text-left'>Settings</p>
                                 </div>
-                                <div
-                                    id='Multibox input'
-                                    className='flex flex-row items-center gap-4 w-full justify-start'
-                                >
-                                    <p className='text-left'>{useMultibox ? 'Yes' : 'No'}</p>
-                                    <input
-                                        id='isMultibox'
-                                        type='checkbox'
-                                        className='pb-4 cursor-pointer'
-                                        style={{ width: '2em', height: '2em' }}
-                                        onChange={(e) => setUseMultibox(e.target.checked)}
-                                    />
-                                </div>
+                                <ul className={listClass}>
+                                    <li className='flex flex-row items-center gap-4 text-sm/6 text-center text-left'>
+                                        <input
+                                            id='isPrivate'
+                                            type='checkbox'
+                                            className='pb-4 cursor-pointer'
+                                            style={{ width: '2em', height: '2em' }}
+                                            onChange={(e) =>
+                                                setRecipeMetaData({ ...recipeMetaData, isPrivate: e.target.checked })
+                                            }
+                                        />
+                                        <label htmlFor='isPrivate' className={settingClass}>
+                                            Mark recipe private?
+                                        </label>
+                                    </li>
+                                    <li className='flex flex-row items-center gap-4 text-sm/6 text-center text-left'>
+                                        <input
+                                            id='isMultibox'
+                                            type='checkbox'
+                                            className='pb-4 cursor-pointer'
+                                            style={{ width: '2em', height: '2em' }}
+                                            onChange={(e) => setUseMultibox(e.target.checked)}
+                                        />
+                                        <label htmlFor='isMultibox' className={settingClass}>
+                                            Use multiple input boxes for ingredients and steps?
+                                        </label>
+                                    </li>
+                                    {useMultibox && (
+                                        <p className='text-l text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
+                                            Press <code>Enter</code> on a step/ingredient to add another
+                                            step/ingredient. Or, paste multiline text (separated with a newline) to add
+                                            multiple steps/ingredients at once.
+                                        </p>
+                                    )}
+                                </ul>
                             </div>
                             <div id='Ingredients' className='flex w-full flex-col gap-[2px] row-start-2 items-center'>
-                                <p className='text-xl text-center text-left w-full p-2 bg-yellow-800 mb-2 rounded-sm'>
-                                    Press <code>Enter</code> on a step/ingredient to add another step/ingredient. Or,
-                                    paste multiline text (separated with a newline) to add multiple steps/ingredients at
-                                    once.
-                                </p>
                                 <div id='Ingredients title' className='flex flex-row w-full items-stretch'>
                                     <p className='flex-grow text-xl md:text-3xl text-center text-left'>Ingredients</p>
                                     {useMultibox && (
@@ -518,31 +534,6 @@ export default function RecipeForm() {
                                         }}
                                     />
                                 )}
-                            </div>
-                            <div id='Private' className='flex flex-col w-full gap-[2px] row-start-2 items-start'>
-                                <div
-                                    id='Private title'
-                                    className='flex flex-row items-center gap-4 w-full justify-start'
-                                >
-                                    <label htmlFor='isPrivate' className='flex-grow text-xl md:text-3xl text-left'>
-                                        Mark recipe private?
-                                    </label>
-                                </div>
-                                <div
-                                    id='Private input'
-                                    className='flex flex-row items-center gap-4 w-full justify-start'
-                                >
-                                    <p className='text-left'>{isPrivate ? 'Yes' : 'No'}</p>
-                                    <input
-                                        id='isPrivate'
-                                        type='checkbox'
-                                        className='pb-4 cursor-pointer'
-                                        style={{ width: '2em', height: '2em' }}
-                                        onChange={(e) =>
-                                            setRecipeMetaData({ ...recipeMetaData, isPrivate: e.target.checked })
-                                        }
-                                    />
-                                </div>
                             </div>
                             <div id='Import' className='flex flex-col w-full gap-[2px] row-start-2 items-center'>
                                 <div id='Import title' className='flex flex-row w-full items-stretch'>
