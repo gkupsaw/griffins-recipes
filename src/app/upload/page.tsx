@@ -354,7 +354,7 @@ export default function RecipeForm() {
                                             }
                                         />
                                         <label htmlFor='isPrivate' className={settingClass}>
-                                            Mark recipe private?
+                                            Private recipe
                                         </label>
                                     </li>
                                     <li className='flex flex-row items-center gap-4 text-sm/6 text-center text-left'>
@@ -366,7 +366,7 @@ export default function RecipeForm() {
                                             onChange={(e) => setUseMultibox(e.target.checked)}
                                         />
                                         <label htmlFor='isMultibox' className={settingClass}>
-                                            Use multiple input boxes for ingredients and steps?
+                                            Split ingredients and steps into multiple input boxes
                                         </label>
                                     </li>
                                     {useMultibox && (
