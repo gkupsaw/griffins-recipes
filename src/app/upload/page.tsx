@@ -586,7 +586,7 @@ export default function RecipeForm() {
                             >
                                 {recipeUrl && (
                                     <p className='flex-grow text-xl text-center text-green-500 font-bold'>
-                                        Upload complete!! :) Your recipe is available at{' '}
+                                        Upload complete!! :) Your recipe will be available at{' '}
                                         <a
                                             className='flex items-center gap-2 hover:underline hover:underline-offset-4'
                                             href={recipeUrl}
@@ -595,6 +595,7 @@ export default function RecipeForm() {
                                         >
                                             {recipeUrl}
                                         </a>
+                                        . It may take a minute or two for it to show up.
                                     </p>
                                 )}
                                 <button
