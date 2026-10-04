@@ -713,7 +713,7 @@ export default function RecipeForm() {
                                         e.preventDefault();
                                         if (
                                             window.confirm(
-                                                "Sync recipe list displayed on the homepage? You only need to do this if the list isn't displaying new recipes."
+                                                "Sync recipe list displayed on the homepage? You only need to do this if the list isn't displaying new recipes, or if you deleted a recipe and want to recover it."
                                             )
                                         ) {
                                             async function loadExistingRecipes(
@@ -796,7 +796,7 @@ export default function RecipeForm() {
             <footer className='flex flex-row justify-items-center items-center'>
                 <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                    href='https://www.griffinkupsaw.com/griffins-recipes'
+                    href={window.location.href.split('/').slice(0, -1).join('/')}
                     style={{ width: '5em' }}
                 >
                     Home

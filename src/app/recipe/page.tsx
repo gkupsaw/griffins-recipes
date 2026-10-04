@@ -128,6 +128,26 @@ export default function RecipePage() {
                             >
                                 Edit
                             </a>
+                            <p
+                                className='flex-1 hover:underline hover:underline-offset-4 text-center'
+                                onClick={async () => {
+                                    if (!window.confirm('Are you sure you want to delete this recipe?')) {
+                                        return;
+                                    }
+
+                                    // Only remove the metadata marker - keep recipe data around for recovery if needed
+                                    await RecipeMetaDataDAO.remove(recipeData.recipeName, isPrivate);
+
+                                    // Wait 2 seconds for deletion to propagate
+                                    await new Promise((resolve) => setTimeout(resolve, 2000));
+
+                                    // Redirect home
+                                    redirect(window.location.href.split('/').slice(0, -1).join('/'));
+                                }}
+                                style={{ width: '6em', cursor: 'pointer' }}
+                            >
+                                Delete
+                            </p>
                             <a
                                 className='flex-1 hover:underline hover:underline-offset-4 text-center'
                                 href='upload'
@@ -142,7 +162,7 @@ export default function RecipePage() {
             <footer className='flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8'>
                 <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                    href='https://www.griffinkupsaw.com/griffins-recipes'
+                    href={window.location.href.split('/').slice(0, -1).join('/')}
                     style={{ width: '6em' }}
                 >
                     Home

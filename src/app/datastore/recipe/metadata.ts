@@ -30,6 +30,9 @@ export const RecipeMetaDataDAO = {
 
             const { body } = await downloadData({ path }).result;
             const totalRecipeMetaData: TotalRecipeMetaData = JSON.parse(await body.text());
+
+            console.log(`Got recipe metadata ${JSON.stringify(totalRecipeMetaData)}`);
+
             return totalRecipeMetaData;
         } catch (e) {
             console.warn(`Could not retrieve all recipe metadata: ${e}`);
