@@ -191,9 +191,6 @@ export default function RecipePage() {
                   // Nullify data to trigger loading screen
                   setRecipeData(null);
 
-                  // Wait 5 seconds for deletion to propagate
-                  await new Promise((resolve) => setTimeout(resolve, 5000));
-
                   // Redirect home
                   redirect(
                     window.location.href.split("/").slice(0, -1).join("/"),
