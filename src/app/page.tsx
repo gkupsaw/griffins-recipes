@@ -47,6 +47,7 @@ export default function RecipePage() {
             recipeName,
             recipeMetaData,
           }))
+          .sort((a, b) => a.recipeName.localeCompare(b.recipeName))
           .reduce((acc: Record<string, Recipe[]>, recipe) => {
             const author = recipe.recipeMetaData.recipeAuthor ?? "Misc";
             return { ...acc, [author]: [...(acc[author] ?? []), recipe] };
