@@ -165,8 +165,8 @@ export default function RecipePage() {
             <footer className='flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8'>
                 <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                    href={window.location.href.split('/').slice(0, -1).join('/')}
-                    style={{ width: '6em' }}
+                    onClick={() => redirect(window.location.href.split('/').slice(0, -1).join('/'))}
+                    style={{ width: '6em', cursor: 'pointer' }}
                 >
                     Home
                 </a>

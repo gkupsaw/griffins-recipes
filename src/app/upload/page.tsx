@@ -16,6 +16,7 @@ import { UserDAO } from '../datastore/user/cognito';
 import { RecipeData } from '../types/recipe/data';
 import { RecipeMetaData, TotalRecipeMetaData } from '../types/recipe/metadata';
 import { RecipeMetaDataDAO } from '../datastore/recipe/metadata';
+import { redirect } from 'next/navigation';
 
 const getDefaultRecipeData = (): RecipeData => ({
     recipeName: '',
@@ -796,8 +797,8 @@ export default function RecipeForm() {
             <footer className='flex flex-row justify-items-center items-center'>
                 <a
                     className='flex-1 hover:underline hover:underline-offset-4 text-center'
-                    href={window.location.href.split('/').slice(0, -1).join('/')}
-                    style={{ width: '5em' }}
+                    onClick={() => redirect(window.location.href.split('/').slice(0, -1).join('/'))}
+                    style={{ width: '5em', cursor: 'pointer' }}
                 >
                     Home
                 </a>
