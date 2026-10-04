@@ -116,7 +116,9 @@ export default function RecipePage() {
                 ).toLocaleDateString()}
           </p>
           {recipeMetaData?.recipeAuthor && (
-            <p className={inputClass}>Authored with love by {recipeMetaData.recipeAuthor}</p>
+            <p className={inputClass}>
+              Authored with love by {recipeMetaData.recipeAuthor}
+            </p>
           )}
           <p className={inputClass}>
             {loading ? LOADING : `Description: ${recipeData.recipeDesc}`}

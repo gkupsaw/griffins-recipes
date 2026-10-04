@@ -9,6 +9,7 @@ import { UserDAO } from "./datastore/user/cognito";
 import { RecipeMetaData } from "./types/recipe/metadata";
 
 const LOADING = "Loading...";
+const MISC_AUTHOR = "Misc";
 
 const gray = {
   primary: "bg-gray-800",
@@ -35,6 +36,13 @@ export default function RecipePage() {
   > | null>(null);
   const [user, setUser] = useState<AuthUser | null>(null);
 
+  const sortAuthors = (authorA: string, authorB: string) =>
+    MISC_AUTHOR === authorA
+      ? 1
+      : MISC_AUTHOR === authorB
+        ? -1
+        : authorA.localeCompare(authorB);
+
   useEffect(() => {
     (async () => {
       const currentUser = await UserDAO.getCurrentUser();
@@ -49,7 +57,7 @@ export default function RecipePage() {
           }))
           .sort((a, b) => a.recipeName.localeCompare(b.recipeName))
           .reduce((acc: Record<string, Recipe[]>, recipe) => {
-            const author = recipe.recipeMetaData.recipeAuthor ?? "Misc";
+            const author = recipe.recipeMetaData.recipeAuthor ?? MISC_AUTHOR;
             return { ...acc, [author]: [...(acc[author] ?? []), recipe] };
           }, {});
       }
@@ -108,28 +116,30 @@ export default function RecipePage() {
                 </div>
               )}
               <ul className={listClass}>
-                {Object.entries(publicRecipes).map(([author, recipes]) => (
-                  <div key={author}>
-                    <div
-                      id="Public author title"
-                      className="flex flex-row w-full items-stretch mb-4"
-                    >
-                      <p className="flex-grow text-2xl">{author}</p>
+                {Object.entries(publicRecipes)
+                  .sort(([a], [b]) => sortAuthors(a, b))
+                  .map(([author, recipes]) => (
+                    <div key={author}>
+                      <div
+                        id="Public author title"
+                        className="flex flex-row w-full items-stretch mb-4"
+                      >
+                        <p className="flex-grow text-xl">{author}</p>
+                      </div>
+                      {recipes.map((recipe) => (
+                        <li key={recipe.recipeName} className={inputClass}>
+                          <a
+                            className="hover:underline hover:underline-offset-4 text-center text-xl p-8"
+                            href={`recipe?recipename=${recipe.recipeName}&private=false`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            {recipe.recipeName}
+                          </a>
+                        </li>
+                      ))}
                     </div>
-                    {recipes.map((recipe) => (
-                      <li key={recipe.recipeName} className={inputClass}>
-                        <a
-                          className="hover:underline hover:underline-offset-4 text-center text-xl p-8"
-                          href={`recipe?recipename=${recipe.recipeName}&private=false`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          {recipe.recipeName}
-                        </a>
-                      </li>
-                    ))}
-                  </div>
-                ))}
+                  ))}
               </ul>
               {privateRecipes && (
                 <>
@@ -140,30 +150,32 @@ export default function RecipePage() {
                     <p className="flex-grow text-xl md:text-3xl">Private</p>
                   </div>
                   <ul className={listClass}>
-                    {Object.entries(privateRecipes).map(([author, recipes]) => (
-                      <div key={author}>
-                        <div
-                          id="Public author title"
-                          className="flex flex-row w-full items-stretch mb-4"
-                        >
-                          <p className="flex-grow text-2xl text-center">
-                            {author}
-                          </p>
+                    {Object.entries(privateRecipes)
+                      .sort(([a], [b]) => sortAuthors(a, b))
+                      .map(([author, recipes]) => (
+                        <div key={author}>
+                          <div
+                            id="Public author title"
+                            className="flex flex-row w-full items-stretch mb-4"
+                          >
+                            <p className="flex-grow text-xl text-center">
+                              {author}
+                            </p>
+                          </div>
+                          {recipes.map((recipe) => (
+                            <li key={recipe.recipeName} className={inputClass}>
+                              <a
+                                className="hover:underline hover:underline-offset-4 text-center text-xl p-8"
+                                href={`recipe?recipename=${recipe.recipeName}&private=true`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                {recipe.recipeName}
+                              </a>
+                            </li>
+                          ))}
                         </div>
-                        {recipes.map((recipe) => (
-                          <li key={recipe.recipeName} className={inputClass}>
-                            <a
-                              className="hover:underline hover:underline-offset-4 text-center text-xl p-8"
-                              href={`recipe?recipename=${recipe.recipeName}&private=true`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {recipe.recipeName}
-                            </a>
-                          </li>
-                        ))}
-                      </div>
-                    ))}
+                      ))}
                   </ul>
                 </>
               )}
