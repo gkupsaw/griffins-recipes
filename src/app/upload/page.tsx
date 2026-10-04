@@ -713,7 +713,7 @@ export default function RecipeForm() {
                                         e.preventDefault();
                                         if (
                                             window.confirm(
-                                                "Sync recipe list displayed on the homepage? You only need to do this if the list isn't displaying new recipes, or if you deleted a recipe and want to recover it."
+                                                "Sync recipe list displayed on the homepage? You only need to do this if (1) the list isn't displaying new recipes or (2) you deleted a recipe and want to recover it. Note that this will recover all deleted recipes. Reach out to Griffin if you want your recipe permanently deleted."
                                             )
                                         ) {
                                             async function loadExistingRecipes(

@@ -138,8 +138,11 @@ export default function RecipePage() {
                                     // Only remove the metadata marker - keep recipe data around for recovery if needed
                                     await RecipeMetaDataDAO.remove(recipeData.recipeName, isPrivate);
 
-                                    // Wait 2 seconds for deletion to propagate
-                                    await new Promise((resolve) => setTimeout(resolve, 2000));
+                                    // Nullify data to trigger loading screen
+                                    setRecipeData(null);
+
+                                    // Wait 5 seconds for deletion to propagate
+                                    await new Promise((resolve) => setTimeout(resolve, 5000));
 
                                     // Redirect home
                                     redirect(window.location.href.split('/').slice(0, -1).join('/'));
