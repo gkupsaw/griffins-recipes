@@ -61,6 +61,13 @@ export const RecipeMetaDataDAO = {
         ...existingTotalMetaData,
         [recipeName]: recipeMetaData,
       }),
+      options: {
+        contentType: "application/json",
+        metadata: {
+          // Metadata objects are overwritten on upload, so we need to set cache-control to no-cache to ensure that the latest version is always fetched
+          "cache-control": "no-cache, no-store, must-revalidate",
+        },
+      },
     });
   },
 
