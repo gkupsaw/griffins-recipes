@@ -83,30 +83,53 @@ export default function RecipeForm() {
   const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    async function loadSessionRecipe(): Promise<RecipeData | null> {
+    type SessionRecipeData = {
+      data: RecipeData;
+      metadata: RecipeMetaData;
+    };
+    async function loadSessionRecipe(): Promise<SessionRecipeData | null> {
       const inProgressRecipe = localStorage.getItem("in-progress-recipe");
       if (inProgressRecipe !== null) {
         console.log(`In progress recipe data found: ${inProgressRecipe}`);
-        const inProgressRecipeData: RecipeData = JSON.parse(inProgressRecipe);
-        if (
-          [
-            inProgressRecipeData.recipeName,
-            inProgressRecipeData.recipeDesc,
-            ...inProgressRecipeData.recipeIngredients,
-            ...inProgressRecipeData.recipeSteps,
-          ].some((s) => s.length !== 0)
-        ) {
-          window.alert("Found input from a previous session, loading it in!");
-          return {
-            recipeName: inProgressRecipeData.recipeName ?? recipeName,
-            recipeDesc: inProgressRecipeData.recipeDesc ?? recipeDesc,
-            recipeDateMilliseconds:
-              inProgressRecipeData.recipeDateMilliseconds ??
-              recipeDateMilliseconds,
-            recipeIngredients:
-              inProgressRecipeData.recipeIngredients ?? recipeIngredients,
-            recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
-          };
+        try {
+          const inProgressRecipeResult: SessionRecipeData =
+            JSON.parse(inProgressRecipe);
+
+          const {
+            data: inProgressRecipeData,
+            metadata: inProgressRecipeMetaData,
+          } = inProgressRecipeResult;
+          if (
+            [
+              inProgressRecipeData.recipeName,
+              inProgressRecipeData.recipeDesc,
+              ...inProgressRecipeData.recipeIngredients,
+              ...inProgressRecipeData.recipeSteps,
+            ].some((s) => s.length !== 0)
+          ) {
+            window.alert(
+              `Found input from a previous session${inProgressRecipeData.recipeName ? `for recipe "${inProgressRecipeData.recipeName}"` : ""}, loading it in!`,
+            );
+            return {
+              data: {
+                recipeName: inProgressRecipeData.recipeName ?? recipeName,
+                recipeDesc: inProgressRecipeData.recipeDesc ?? recipeDesc,
+                recipeDateMilliseconds:
+                  inProgressRecipeData.recipeDateMilliseconds ??
+                  recipeDateMilliseconds,
+                recipeIngredients:
+                  inProgressRecipeData.recipeIngredients ?? recipeIngredients,
+                recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
+              },
+              metadata: {
+                isPrivate: inProgressRecipeMetaData.isPrivate ?? isPrivate,
+                recipeAuthor:
+                  inProgressRecipeMetaData.recipeAuthor ?? recipeAuthor,
+              },
+            };
+          }
+        } catch (e) {
+          console.warn(`Could not parse in progress recipe data: ${e}`);
         }
       }
       return null;
@@ -156,9 +179,10 @@ export default function RecipeForm() {
     }
 
     (async () => {
-      const inProgressRecipeData = await loadSessionRecipe();
-      if (inProgressRecipeData !== null) {
-        setRecipeState(inProgressRecipeData);
+      const inProgressRecipe = await loadSessionRecipe();
+      if (inProgressRecipe !== null) {
+        setRecipeState(inProgressRecipe.data);
+        setRecipeMetaData(inProgressRecipe.metadata);
       }
 
       const currentUser = await UserDAO.getCurrentUser();
@@ -170,7 +194,7 @@ export default function RecipeForm() {
           ...(await loadRecipes("private-recipe-metadata")),
         ]);
 
-        if (inProgressRecipeData === null) {
+        if (inProgressRecipe === null) {
           await loadRecipeIfInUrl();
         }
       }
@@ -180,8 +204,11 @@ export default function RecipeForm() {
   useEffect(() => {
     console.log("Saving recipe data to local storage");
 
-    localStorage.setItem("in-progress-recipe", JSON.stringify(recipeState));
-  }, [recipeState]);
+    localStorage.setItem(
+      "in-progress-recipe",
+      JSON.stringify({ data: recipeState, metadata: recipeMetaData }),
+    );
+  }, [recipeState, recipeMetaData]);
 
   async function handleImport() {
     if (!existingRecipeToImport) {
@@ -410,12 +437,13 @@ export default function RecipeForm() {
                     <input
                       id="isPrivate"
                       type="checkbox"
+                      checked={isPrivate}
                       className="pb-4 cursor-pointer"
                       style={{ width: "2em", height: "2em" }}
-                      onChange={(e) =>
+                      onChange={() =>
                         setRecipeMetaData({
                           ...recipeMetaData,
-                          isPrivate: e.target.checked,
+                          isPrivate: !isPrivate,
                         })
                       }
                     />
