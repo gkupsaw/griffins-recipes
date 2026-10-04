@@ -924,13 +924,52 @@ export default function RecipeForm() {
                         "private-recipe-data",
                       );
 
-                      console.log("Updating public metadata...");
+                      console.log(`Listing all metadata...`);
 
-                      const publicMetaData: TotalRecipeMetaData =
-                        publicListResult.reduce(
-                          (acc, s) => ({ ...acc, [s]: { isPrivate: false } }),
+                      const resolveDrift = async (
+                        isPrivate: boolean,
+                        allRecipes: string[],
+                      ): Promise<TotalRecipeMetaData> => {
+                        const currentMetaData =
+                          await RecipeMetaDataDAO.getAll(isPrivate);
+
+                        const correctedMetaData = allRecipes.reduce(
+                          (acc: TotalRecipeMetaData, recipeName: string) => {
+                            let recipe: RecipeMetaData =
+                              currentMetaData[recipeName];
+                            if (!recipe) {
+                              console.warn(
+                                `Recipe "${recipeName}" was not in the current metadata. Adding.`,
+                              );
+                              recipe = { isPrivate, recipeAuthor: null };
+                            }
+
+                            return { ...acc, [recipeName]: recipe };
+                          },
                           {},
                         );
+
+                        console.log(
+                          `Finished resolving drift: before=${JSON.stringify(currentMetaData)} after=${JSON.stringify(correctedMetaData)}`,
+                        );
+
+                        Object.keys(currentMetaData).forEach((recipeName) => {
+                          if (!correctedMetaData[recipeName]) {
+                            console.warn(
+                              `Recipe "${recipeName}" was in the current metadata but not in the existing recipes. Removing.`,
+                            );
+                          }
+                        });
+
+                        return correctedMetaData;
+                      };
+
+                      console.log("Updating public metadata...");
+
+                      const publicMetaData = await resolveDrift(
+                        false,
+                        publicListResult,
+                      );
                       uploadData({
                         path: "recipe-metadata/metadata.json",
                         data: JSON.stringify(publicMetaData),
@@ -938,11 +977,10 @@ export default function RecipeForm() {
 
                       console.log("Updating private metadata...");
 
-                      const privateMetaData: TotalRecipeMetaData =
-                        privateListResult.reduce(
-                          (acc, s) => ({ ...acc, [s]: { isPrivate: true } }),
-                          {},
-                        );
+                      const privateMetaData = await resolveDrift(
+                        true,
+                        privateListResult,
+                      );
                       uploadData({
                         path: "private-recipe-metadata/metadata.json",
                         data: JSON.stringify(privateMetaData),
