@@ -143,6 +143,10 @@ export default function RecipeForm() {
         .then(setRecipeState)
         .catch(window.alert);
 
+      await RecipeMetaDataDAO.get(recipeDirName, privateParam)
+        .then(setRecipeMetaData)
+        .catch(window.alert);
+
       await RecipeImageDAO.getUrl(recipeDirName, privateParam)
         .then(setRecipeImage)
         .catch((e) => {
