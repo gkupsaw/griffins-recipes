@@ -1,60 +1,79 @@
-import { RecipeMetaData, TotalRecipeMetaData } from '@/app/types/recipe/metadata';
-import { downloadData, uploadData } from 'aws-amplify/storage';
+import {
+  RecipeMetaData,
+  TotalRecipeMetaData,
+} from "@/app/types/recipe/metadata";
+import { downloadData, uploadData } from "aws-amplify/storage";
 
-type RecipeMetaDataPath = 'private-recipe-metadata/metadata.json' | 'recipe-metadata/metadata.json';
+type RecipeMetaDataPath =
+  | "private-recipe-metadata/metadata.json"
+  | "recipe-metadata/metadata.json";
 
 export const RecipeMetaDataDAO = {
-    getMetaDataPath(isPrivate: boolean): RecipeMetaDataPath {
-        return `${isPrivate ? 'private-recipe-metadata' : 'recipe-metadata'}/metadata.json`;
-    },
+  getMetaDataPath(isPrivate: boolean): RecipeMetaDataPath {
+    return `${isPrivate ? "private-recipe-metadata" : "recipe-metadata"}/metadata.json`;
+  },
 
-    async get(recipeName: string, isPrivate: boolean): Promise<RecipeMetaData> {
-        let recipeMetaData = null;
-        try {
-            recipeMetaData = (await this.getAll(isPrivate))[recipeName];
-        } catch (e) {
-            console.warn(`Could not retrieve recipe metadata: ${e}`);
-        }
+  async get(recipeName: string, isPrivate: boolean): Promise<RecipeMetaData> {
+    let recipeMetaData = null;
+    try {
+      recipeMetaData = (await this.getAll(isPrivate))[recipeName];
+    } catch (e) {
+      console.warn(`Could not retrieve recipe metadata: ${e}`);
+    }
 
-        if (!recipeMetaData) {
-            throw new Error('Could not retrieve recipe metadata');
-        }
+    if (!recipeMetaData) {
+      throw new Error("Could not retrieve recipe metadata");
+    }
 
-        return recipeMetaData;
-    },
+    return recipeMetaData;
+  },
 
-    async getAll(isPrivate: boolean): Promise<TotalRecipeMetaData> {
-        try {
-            const path = this.getMetaDataPath(isPrivate);
-            console.log(`Loading all recipe metadata at ${path}...`);
+  async getAll(isPrivate: boolean): Promise<TotalRecipeMetaData> {
+    try {
+      const path = this.getMetaDataPath(isPrivate);
+      console.log(`Loading all recipe metadata at ${path}...`);
 
-            const { body } = await downloadData({ path }).result;
-            const totalRecipeMetaData: TotalRecipeMetaData = JSON.parse(await body.text());
+      const { body } = await downloadData({ path }).result;
+      const totalRecipeMetaData: TotalRecipeMetaData = JSON.parse(
+        await body.text(),
+      );
 
-            console.log(`Got recipe metadata ${JSON.stringify(totalRecipeMetaData)}`);
+      console.log(`Got recipe metadata ${JSON.stringify(totalRecipeMetaData)}`);
 
-            return totalRecipeMetaData;
-        } catch (e) {
-            console.warn(`Could not retrieve all recipe metadata: ${e}`);
-            return {};
-        }
-    },
+      return totalRecipeMetaData;
+    } catch (e) {
+      console.warn(`Could not retrieve all recipe metadata: ${e}`);
+      return {};
+    }
+  },
 
-    async add(recipeMetaData: RecipeMetaData, recipeName: string, isPrivate: boolean): Promise<void> {
-        const existingTotalMetaData = await this.getAll(isPrivate);
-        const path = this.getMetaDataPath(isPrivate);
-        console.log(`Uploading metadata to ${path}...`);
-        uploadData({ path, data: JSON.stringify({ ...existingTotalMetaData, [recipeName]: recipeMetaData }) });
-    },
+  async add(
+    recipeMetaData: RecipeMetaData,
+    recipeName: string,
+    isPrivate: boolean,
+  ): Promise<void> {
+    const existingTotalMetaData = await this.getAll(isPrivate);
+    const path = this.getMetaDataPath(isPrivate);
+    console.log(`Uploading metadata to ${path}...`);
+    uploadData({
+      path,
+      data: JSON.stringify({
+        ...existingTotalMetaData,
+        [recipeName]: recipeMetaData,
+      }),
+    });
+  },
 
-    async remove(recipeName: string, isPrivate: boolean): Promise<void> {
-        const totalMetaData = await this.getAll(isPrivate);
-        const path = this.getMetaDataPath(isPrivate);
+  async remove(recipeName: string, isPrivate: boolean): Promise<void> {
+    const totalMetaData = await this.getAll(isPrivate);
+    const path = this.getMetaDataPath(isPrivate);
 
-        console.log(`Removing metadata for ${recipeName} from recipe metadata ${path}...`);
-        delete totalMetaData[recipeName];
+    console.log(
+      `Removing metadata for ${recipeName} from recipe metadata ${path}...`,
+    );
+    delete totalMetaData[recipeName];
 
-        console.log(`Uploading metadata to ${path}...`);
-        uploadData({ path, data: JSON.stringify(totalMetaData) });
-    },
+    console.log(`Uploading metadata to ${path}...`);
+    uploadData({ path, data: JSON.stringify(totalMetaData) });
+  },
 };

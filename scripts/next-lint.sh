@@ -1,7 +1,5 @@
 #!/bin/sh
 
-echo "====== Running Pre-Commit Validations ======"
-
 # Load environment paths for GUI Git clients
 if [ -f "$HOME/.nvm/nvm.sh" ]; then
   . "$HOME/.nvm/nvm.sh"
@@ -14,16 +12,15 @@ fi
 export PATH="$PATH:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
 
 # 1. Run Biome formatter script
-echo "Running: npm run format..."
-npm run format
+npm run format-check > /dev/null 2>&1
 if [ $? -ne 0 ]; then
-  echo "❌ Formatting failed. Commit aborted."
+  echo "❌ Formatting failed. Commit aborted. Formatter will now run automatically, please commit all changes."
+  npm run format
   exit 1
 fi
 
 # 2. Run production build script to verify SSR
-echo "Running: npm run build..."
-npm run build
+npm run build > /dev/null 2>&1
 if [ $? -ne 0 ]; then
   echo "❌ Next.js build failed. Your SSR or Server Components are broken! Commit aborted."
   exit 1
