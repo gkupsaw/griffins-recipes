@@ -82,12 +82,15 @@ export default function RecipeForm() {
 
   const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
+  const [isLocalStorageLoaded, setIsLocalStorageLoaded] =
+    useState<boolean>(false);
+
   useEffect(() => {
     type SessionRecipeData = {
       data: RecipeData;
       metadata: RecipeMetaData;
     };
-    async function loadSessionRecipe(): Promise<SessionRecipeData | null> {
+    async function extractSessionRecipe(): Promise<SessionRecipeData | null> {
       const inProgressRecipe = localStorage.getItem("in-progress-recipe");
       if (inProgressRecipe !== null) {
         console.log(`In progress recipe data found: ${inProgressRecipe}`);
@@ -107,9 +110,6 @@ export default function RecipeForm() {
               ...inProgressRecipeData.recipeSteps,
             ].some((s) => s.length !== 0)
           ) {
-            window.alert(
-              `Found input from a previous session${inProgressRecipeData.recipeName ? `for recipe "${inProgressRecipeData.recipeName}"` : ""}, loading it in!`,
-            );
             return {
               data: {
                 recipeName: inProgressRecipeData.recipeName ?? recipeName,
@@ -151,16 +151,34 @@ export default function RecipeForm() {
       }
     }
 
-    async function loadRecipeIfInUrl() {
+    function loadSessionRecipe(sessionRecipe: SessionRecipeData) {
+      window.alert(
+        `Loading input from previous session${sessionRecipe.data.recipeName ? `for recipe "${sessionRecipe.data.recipeName}"` : ""}.`,
+      );
+      setRecipeState(sessionRecipe.data);
+      setRecipeMetaData(sessionRecipe.metadata);
+    }
+
+    type UrlRecipeParams = {
+      recipeDirName: string;
+      privateParam: boolean;
+    };
+    function extractUrlRecipe(): UrlRecipeParams | null {
       const searchParams = new URLSearchParams(document.location.search);
       const recipeDirName = searchParams.get("recipename");
       const privateParam = searchParams.get("private") === "true";
 
       if (recipeDirName === null) {
-        return console.log("No recipe params in URL");
+        console.log("No recipe params in URL");
+        return null;
       }
 
-      console.log("Found recipe params in URL, attempting download");
+      console.log("Found recipe params in URL");
+      return { recipeDirName, privateParam };
+    }
+
+    async function loadRemoteRecipe(params: UrlRecipeParams) {
+      const { recipeDirName, privateParam } = params;
 
       await RecipeDataDAO.get(recipeDirName, privateParam)
         .then(setRecipeState)
@@ -179,12 +197,6 @@ export default function RecipeForm() {
     }
 
     (async () => {
-      const inProgressRecipe = await loadSessionRecipe();
-      if (inProgressRecipe !== null) {
-        setRecipeState(inProgressRecipe.data);
-        setRecipeMetaData(inProgressRecipe.metadata);
-      }
-
       const currentUser = await UserDAO.getCurrentUser();
       setUser(currentUser);
 
@@ -194,21 +206,46 @@ export default function RecipeForm() {
           ...(await loadRecipes("private-recipe-metadata")),
         ]);
 
-        if (inProgressRecipe === null) {
-          await loadRecipeIfInUrl();
+        const sessionRecipe = await extractSessionRecipe();
+        const urlRecipe = extractUrlRecipe();
+
+        if (sessionRecipe && !urlRecipe) {
+          loadSessionRecipe(sessionRecipe);
+        } else if (!sessionRecipe && urlRecipe) {
+          await loadRemoteRecipe(urlRecipe);
+        } else if (sessionRecipe && urlRecipe) {
+          if (sessionRecipe.data.recipeName === urlRecipe.recipeDirName) {
+            // If the session data is for the same recipe as the URL recipe, assume that the user wants to continue where they left off.
+            loadSessionRecipe(sessionRecipe);
+          } else {
+            // Otherwise, explicitly request confirmation before clearing session data.
+            const prompt = `It looks like you were editing the recipe "${sessionRecipe.data.recipeName}" in a previous session. Would you like to clear your work so that you can edit "${urlRecipe.recipeDirName}" instead? Enter "clear" if so.`;
+            if (["clear"].includes(window.prompt(prompt) ?? "")) {
+              await loadRemoteRecipe(urlRecipe);
+            } else {
+              loadSessionRecipe(sessionRecipe);
+            }
+          }
         }
+
+        setIsLocalStorageLoaded(true);
       }
     })();
   }, []);
 
   useEffect(() => {
+    if (!isLocalStorageLoaded) {
+      console.log("Loading recipe data from local storage...");
+      return;
+    }
+
     console.log("Saving recipe data to local storage");
 
     localStorage.setItem(
       "in-progress-recipe",
       JSON.stringify({ data: recipeState, metadata: recipeMetaData }),
     );
-  }, [recipeState, recipeMetaData]);
+  }, [recipeState, recipeMetaData, isLocalStorageLoaded]);
 
   async function handleImport() {
     if (!existingRecipeToImport) {
