@@ -82,6 +82,8 @@ jobs:
               run: npx ampx generate outputs --stack amplify-griffinsrecipes-gkupsaw-sandbox-660bc340db
             - name: Build with Next.js
               run: ${{ steps.detect-package-manager.outputs.runner }} next build
+              env:
+                NEXT_PUBLIC_RECIPE_IMPORT_URL: ${{ vars.NEXT_PUBLIC_RECIPE_IMPORT_URL }}
             - name: Upload artifact
               uses: actions/upload-pages-artifact@v3
               with:
