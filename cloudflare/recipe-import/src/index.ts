@@ -122,10 +122,19 @@ function parseTarget(raw: string | null): URL | null {
 
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
+    const allowed = (env.ALLOWED_ORIGIN ?? "*").split(",").map((s) => s.trim());
+    const origin = request.headers.get("Origin") ?? "";
+    const allowOrigin = allowed.includes("*")
+      ? "*"
+      : allowed.includes(origin)
+        ? origin
+        : allowed[0];
+
     const headers = {
-      "Access-Control-Allow-Origin": env.ALLOWED_ORIGIN ?? "*",
+      "Access-Control-Allow-Origin": allowOrigin,
       "Access-Control-Allow-Methods": "GET, OPTIONS",
       "Content-Type": "application/json",
+      Vary: "Origin",
     };
     const reply = (body: ApiResponse, status = 200) =>
       new Response(JSON.stringify(body), { status, headers });
