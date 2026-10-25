@@ -17,6 +17,7 @@ import { RecipeData } from "../types/recipe/data";
 import { RecipeMetaData, TotalRecipeMetaData } from "../types/recipe/metadata";
 import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
 import { redirect } from "next/navigation";
+import { importRecipeFromLink } from "./import_remote";
 
 const getDefaultRecipeData = (): RecipeData => ({
   recipeName: "",
@@ -54,6 +55,8 @@ const defaultStepsCount = 1;
 export default function RecipeForm() {
   const [submitting, setSubmitting] = useState(false);
   const [importing, setImporting] = useState(false);
+  const [importLink, setImportLink] = useState("");
+  const [importingLink, setImportingLink] = useState(false);
   const [useMultibox, setUseMultibox] = useState(false);
 
   const [existingRecipes, setExistingRecipes] = useState<string[] | null>(null);
@@ -272,6 +275,33 @@ export default function RecipeForm() {
       .catch(window.alert);
   }
 
+  async function handleImportFromLink() {
+    const hasWork = [recipeName, ...recipeIngredients, ...recipeSteps].some(
+      (s) => s.length > 0,
+    );
+    if (
+      hasWork &&
+      !window.confirm(
+        "Replace the name, ingredients and steps with the imported recipe?",
+      )
+    ) {
+      return;
+    }
+
+    setImportingLink(true);
+    try {
+      const imported = await importRecipeFromLink(importLink.trim());
+      setRecipeState({ ...recipeState, ...imported }); // keeps description and date
+      setImportLink("");
+    } catch (e) {
+      window.alert(
+        `Could not import recipe: ${e instanceof Error ? e.message : e}`,
+      );
+    } finally {
+      setImportingLink(false);
+    }
+  }
+
   async function handleUpload() {
     if (
       [recipeName, recipeDesc, ...recipeIngredients, ...recipeSteps].some(
@@ -343,7 +373,7 @@ export default function RecipeForm() {
     }
   }
 
-  const disabled = submitting || importing;
+  const disabled = submitting || importing || importingLink;
 
   return (
     <div className="font-sans flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20 md:px-[20%]">
@@ -685,6 +715,41 @@ export default function RecipeForm() {
                     }}
                   />
                 )}
+              </div>
+              <div
+                id="Import link"
+                className="flex flex-col w-full gap-[2px] row-start-2 items-center"
+              >
+                <p className="w-full text-xl md:text-3xl text-center text-left">
+                  Import from link (optional)
+                </p>
+                <div className="flex flex-row w-full text-sm/6 text-center text-left">
+                  <input
+                    type="url"
+                    className={inputClass}
+                    placeholder="Paste a recipe link"
+                    value={importLink}
+                    onChange={(e) => setImportLink(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // Enter would otherwise submit the <form> and reload the page
+                        if (importLink.trim() && !disabled)
+                          handleImportFromLink();
+                      }
+                    }}
+                    disabled={disabled}
+                  />
+                  <button
+                    disabled={disabled || !importLink.trim()}
+                    className={buttonClass}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleImportFromLink();
+                    }}
+                  >
+                    {importingLink ? "Importing..." : "Import"}
+                  </button>
+                </div>
               </div>
               <div
                 id="Import"
