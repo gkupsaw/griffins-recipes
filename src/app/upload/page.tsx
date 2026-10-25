@@ -488,6 +488,41 @@ export default function RecipeForm() {
               </div>
               <hr />
               <div
+                id="Import link"
+                className="flex flex-col w-full gap-[2px] row-start-2 items-center"
+              >
+                <p className="w-full text-xl md:text-3xl text-center text-left">
+                  (New ✨) Import from another website
+                </p>
+                <div className="flex flex-row w-full text-sm/6 text-center text-left">
+                  <input
+                    type="url"
+                    className={inputClass}
+                    placeholder="Paste a recipe link - if it's compatible, ingredients and steps will be imported automatically"
+                    value={importLink}
+                    onChange={(e) => setImportLink(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault(); // Enter would otherwise submit the <form> and reload the page
+                        if (importLink.trim() && !disabled)
+                          handleImportFromLink();
+                      }
+                    }}
+                    disabled={disabled}
+                  />
+                  <button
+                    disabled={disabled || !importLink.trim()}
+                    className={buttonClass}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleImportFromLink();
+                    }}
+                  >
+                    {importingLink ? "Importing..." : "Import"}
+                  </button>
+                </div>
+              </div>
+              <div
                 id="Settings"
                 className="flex flex-col w-full gap-[2px] row-start-2 items-start"
               >
@@ -715,41 +750,6 @@ export default function RecipeForm() {
                     }}
                   />
                 )}
-              </div>
-              <div
-                id="Import link"
-                className="flex flex-col w-full gap-[2px] row-start-2 items-center"
-              >
-                <p className="w-full text-xl md:text-3xl text-center text-left">
-                  Import from link (optional)
-                </p>
-                <div className="flex flex-row w-full text-sm/6 text-center text-left">
-                  <input
-                    type="url"
-                    className={inputClass}
-                    placeholder="Paste a recipe link"
-                    value={importLink}
-                    onChange={(e) => setImportLink(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault(); // Enter would otherwise submit the <form> and reload the page
-                        if (importLink.trim() && !disabled)
-                          handleImportFromLink();
-                      }
-                    }}
-                    disabled={disabled}
-                  />
-                  <button
-                    disabled={disabled || !importLink.trim()}
-                    className={buttonClass}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleImportFromLink();
-                    }}
-                  >
-                    {importingLink ? "Importing..." : "Import"}
-                  </button>
-                </div>
               </div>
               <div
                 id="Import"
