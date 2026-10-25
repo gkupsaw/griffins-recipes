@@ -760,7 +760,7 @@ export default function RecipeForm() {
                   className="flex flex-row w-full items-stretch"
                 >
                   <p className="flex-grow text-xl md:text-3xl text-center text-left">
-                    Import existing recipe (optional)
+                    Import existing recipe to edit (optional)
                   </p>
                 </div>
                 <div className="flex flex-row w-full text-sm/6 text-center text-left">
