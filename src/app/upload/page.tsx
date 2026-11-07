@@ -241,29 +241,69 @@ export default function RecipeForm() {
               className="flex w-full flex-col gap-[8px] row-start-2 items-center"
             >
               <div
-                id="Date"
-                className="flex w-full flex-col gap-[2px] row-start-2 items-center"
+                id="Overview title"
+                className="flex flex-row items-center gap-4 w-full justify-start"
+              >
+                <p className="flex-grow text-xl md:text-3xl text-center text-left">
+                  Overview
+                </p>
+              </div>
+              <div
+                id="Overview content"
+                className="flex w-full flex-col gap-2 row-start-2 items-center"
               >
                 <div
-                  id="Date title"
-                  className="flex flex-row w-full items-stretch"
+                  id="Togglable content"
+                  className="flex flex-row items-center gap-4 text-center"
+                  style={{ alignSelf: "start" }}
                 >
-                  <p className="flex-grow text-xl md:text-3xl text-center text-left">
-                    Born on{" "}
-                    {new Date(recipeDateMilliseconds).toLocaleDateString()}
-                  </p>
-                  <button
-                    className={buttonClass}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setRecipeState({
-                        ...recipeState,
-                        recipeDateMilliseconds: new Date().getTime(),
-                      });
-                    }}
+                  <div
+                    id="Togglable labels"
+                    className="flex flex-col items-start justify-center gap-4 text-sm/6"
+                    style={{ alignSelf: "start" }}
                   >
-                    Reset
-                  </button>
+                    <p className="flex-grow text-l text-center">
+                      Born on{" "}
+                      {new Date(recipeDateMilliseconds).toLocaleDateString()}
+                    </p>
+                    <label
+                      htmlFor="isPrivate"
+                      className="flex-grow text-l text-center"
+                    >
+                      Private recipe?
+                    </label>
+                  </div>
+                  <div
+                    id="Togglable inputs"
+                    className="flex flex-col items-center justify-center gap-4"
+                    style={{ alignSelf: "start" }}
+                  >
+                    <button
+                      className={`bg-blue-800 hover:bg-blue-600 py-0.5 px-1 rounded inline-flex items-center text-xs cursor-pointer`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setRecipeState({
+                          ...recipeState,
+                          recipeDateMilliseconds: new Date().getTime(),
+                        });
+                      }}
+                    >
+                      Reset
+                    </button>
+                    <input
+                      id="isPrivate"
+                      type="checkbox"
+                      checked={isPrivate}
+                      className="cursor-pointer"
+                      style={{ width: "1.5em", height: "1.5em" }}
+                      onChange={() =>
+                        setRecipeMetaData({
+                          ...recipeMetaData,
+                          isPrivate: !isPrivate,
+                        })
+                      }
+                    />
+                  </div>
                 </div>
                 <textarea
                   value={recipeDesc}
@@ -302,24 +342,6 @@ export default function RecipeForm() {
                   </p>
                 </div>
                 <ul className={listClass}>
-                  <li className="flex flex-row items-center gap-4 text-sm/6 text-center text-left">
-                    <input
-                      id="isPrivate"
-                      type="checkbox"
-                      checked={isPrivate}
-                      className="pb-4 cursor-pointer"
-                      style={{ width: "2em", height: "2em" }}
-                      onChange={() =>
-                        setRecipeMetaData({
-                          ...recipeMetaData,
-                          isPrivate: !isPrivate,
-                        })
-                      }
-                    />
-                    <label htmlFor="isPrivate" className={settingClass}>
-                      Private recipe
-                    </label>
-                  </li>
                   <li className="flex flex-row items-center gap-4 text-sm/6 text-center text-left">
                     <input
                       id="isMultibox"
