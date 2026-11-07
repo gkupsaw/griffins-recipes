@@ -50,7 +50,9 @@ const defaultIngredientsCount = 1;
 const defaultStepsCount = 1;
 
 export default function RecipeForm() {
-  const [useMultibox, setUseMultibox] = useState(false);
+  // Uncontrolled right now, deciding on UI
+  const [useIngredientsMultibox, setUseIngredientsMultibox] = useState(true);
+  const [useStepsMultibox, setUseStepsMultibox] = useState(true);
 
   const [user, setUser] = useState<AuthUser | null>(null);
 
@@ -329,7 +331,7 @@ export default function RecipeForm() {
                 />
               </div>
               <hr />
-              <div
+              {/* <div
                 id="Settings"
                 className="flex flex-col w-full gap-[2px] row-start-2 items-start"
               >
@@ -363,7 +365,7 @@ export default function RecipeForm() {
                     </p>
                   )}
                 </ul>
-              </div>
+              </div> */}
               <div
                 id="Ingredients"
                 className="flex w-full flex-col gap-[2px] row-start-2 items-center"
@@ -375,7 +377,7 @@ export default function RecipeForm() {
                   <p className="flex-grow text-xl md:text-3xl text-center text-left">
                     Ingredients
                   </p>
-                  {useMultibox && (
+                  {useIngredientsMultibox && (
                     <button
                       className={buttonClass}
                       onClick={(e) => {
@@ -390,7 +392,7 @@ export default function RecipeForm() {
                     </button>
                   )}
                 </div>
-                {useMultibox ? (
+                {useIngredientsMultibox ? (
                   <ul className={listClass}>
                     {recipeIngredients.map((ingredient, i) => (
                       <li
@@ -463,7 +465,7 @@ export default function RecipeForm() {
                   <p className="flex-grow text-xl md:text-3xl text-center text-left">
                     Steps
                   </p>
-                  {useMultibox && (
+                  {useStepsMultibox && (
                     <button
                       className={buttonClass}
                       onClick={(e) => {
@@ -478,7 +480,7 @@ export default function RecipeForm() {
                     </button>
                   )}
                 </div>
-                {useMultibox ? (
+                {useStepsMultibox ? (
                   <ul className={listClass}>
                     {recipeSteps.map((ingredient, i) => (
                       <li
