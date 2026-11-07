@@ -12,6 +12,7 @@ import {
 import { RecipeData } from "@/app/types/recipe/data";
 import { RecipeMetaData } from "@/app/types/recipe/metadata";
 import { extractStaticRecipe, StaticRecipeParams } from "./static_data";
+import { Alert } from "./alerts";
 
 export async function loadRecipe(
   recipeState: RecipeData,
@@ -21,7 +22,9 @@ export async function loadRecipe(
   setRecipeMetaData: (value: RecipeMetaData) => void,
   setRecipeImage: (value: File | string | null) => void,
   setIsLocalStorageLoaded: (value: boolean) => void,
-): Promise<void> {
+): Promise<Alert[]> {
+  const alerts: Alert[] = [];
+
   const currentUser = await UserDAO.getCurrentUser();
   setUser(currentUser);
 
@@ -50,14 +53,22 @@ export async function loadRecipe(
 
     switch (decision.verdict) {
       case "UseSessionRecipe":
-        loadSessionRecipe(decision.data, setRecipeState, setRecipeMetaData);
+        alerts.push(
+          ...loadSessionRecipe(
+            decision.data,
+            setRecipeState,
+            setRecipeMetaData,
+          ),
+        );
         break;
       case "UseUrlRecipe":
-        await loadRemoteRecipe(
-          decision.data,
-          setRecipeState,
-          setRecipeMetaData,
-          setRecipeImage,
+        alerts.push(
+          ...(await loadRemoteRecipe(
+            decision.data,
+            setRecipeState,
+            setRecipeMetaData,
+            setRecipeImage,
+          )),
         );
         break;
       case "UseStaticRecipe":
@@ -80,6 +91,8 @@ export async function loadRecipe(
 
     setIsLocalStorageLoaded(true);
   }
+
+  return alerts;
 }
 
 type StateConflictDecision =

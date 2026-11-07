@@ -1,5 +1,6 @@
 import { RecipeData } from "../../types/recipe/data";
 import { RecipeMetaData } from "../../types/recipe/metadata";
+import { Alert } from "./alerts";
 
 export type SessionRecipeData = {
   data: RecipeData;
@@ -60,10 +61,20 @@ export function loadSessionRecipe(
   sessionRecipe: SessionRecipeData,
   setRecipeState: (recipeState: RecipeData) => void,
   setRecipeMetaData: (recipeMetaData: RecipeMetaData) => void,
-): void {
-  window.alert(
+): Alert[] {
+  console.log(
     `Loading input from previous session${sessionRecipe.data.recipeName ? `for recipe "${sessionRecipe.data.recipeName}"` : ""}.`,
   );
   setRecipeState(sessionRecipe.data);
   setRecipeMetaData(sessionRecipe.metadata);
+  return [
+    {
+      type: "INFO",
+      message: `Your previous session was loaded${
+        sessionRecipe.data.recipeName
+          ? ` for recipe "${sessionRecipe.data.recipeName}"`
+          : ""
+      }.`,
+    },
+  ];
 }

@@ -3,6 +3,7 @@ import { RecipeImageDAO } from "../../datastore/recipe/image";
 import { RecipeMetaDataDAO } from "../../datastore/recipe/metadata";
 import { RecipeData } from "../../types/recipe/data";
 import { RecipeMetaData } from "../../types/recipe/metadata";
+import { Alert } from "./alerts";
 
 export type UrlRecipeParams = {
   recipeDirName: string;
@@ -27,16 +28,29 @@ export async function loadRemoteRecipe(
   setRecipeState: (recipeState: RecipeData) => void,
   setRecipeMetaData: (recipeMetaData: RecipeMetaData) => void,
   setRecipeImage: (recipeImage: File | string | null) => void,
-) {
+): Promise<Alert[]> {
+  const alerts: Alert[] = [];
   const { recipeDirName, privateParam } = params;
 
   await RecipeDataDAO.get(recipeDirName, privateParam)
     .then(setRecipeState)
-    .catch(window.alert);
+    .catch((e) => {
+      console.warn(e);
+      alerts.push({
+        type: "ERROR",
+        message: `We couldn't load your recipe data`,
+      });
+    });
 
   await RecipeMetaDataDAO.get(recipeDirName, privateParam)
     .then(setRecipeMetaData)
-    .catch(window.alert);
+    .catch((e) => {
+      console.warn(e);
+      alerts.push({
+        type: "ERROR",
+        message: `We couldn't load your recipe metadata`,
+      });
+    });
 
   await RecipeImageDAO.getUrl(recipeDirName, privateParam)
     .then(setRecipeImage)
@@ -44,4 +58,6 @@ export async function loadRemoteRecipe(
       console.warn(e);
       setRecipeImage(null);
     });
+
+  return alerts;
 }
