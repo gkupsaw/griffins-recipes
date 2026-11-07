@@ -78,8 +78,8 @@ export default function RecipePage() {
     recipeMetaData === null;
 
   return (
-    <div className="font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20">
-      <main className="flex flex-col gap-[32px] row-start-2 justify-center">
+    <div className="font-mono flex flex-grow flex-col items-center justify-items-center min-h-screen sm:pt-20 sm:pl-20 sm:pr-20">
+      <main className="flex flex-grow flex-col gap-[32px] row-start-2 justify-center">
         <div
           id="Title"
           className="flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl"

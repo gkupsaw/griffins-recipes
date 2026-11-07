@@ -7,8 +7,8 @@ import { useEffect, useState } from "react";
 import { RecipeMetaDataDAO } from "./datastore/recipe/metadata";
 import { UserDAO } from "./datastore/user/cognito";
 import { RecipeMetaData } from "./types/recipe/metadata";
+import { Icon } from "@iconify/react";
 
-const LOADING = "Loading...";
 const MISC_AUTHOR = "Misc";
 
 const gray = {
@@ -86,19 +86,17 @@ export default function RecipePage() {
   const authenticated = UserDAO.isAuthenticated(user);
 
   return (
-    <div className="font-mono flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 sm:p-20">
-      <main className="flex flex-col row-start-2 justify-items-center">
+    <div className="font-mono flex flex-grow flex-col items-center justify-items-center min-h-screen sm:pt-20 sm:pl-20 sm:pr-20">
+      <main className="flex flex-col row-start-2 justify-items-center flex-grow">
         <div
           id="Recipes"
-          className="flex flex-col w-full gap-[24px] row-start-2 justify-items-center text-center"
+          className="flex flex-grow flex-col w-full gap-[24px] row-start-2 justify-items-center text-center justify-center"
         >
           {loading ? (
-            <div
-              id="Recipes title"
-              className="flex flex-row w-full items-stretch"
-            >
-              <p className="flex-grow text-3xl md:text-8xl">{LOADING}</p>
-            </div>
+            <Icon
+              icon="eos-icons:bubble-loading"
+              style={{ fontSize: "128px" }}
+            />
           ) : (
             <>
               <div
