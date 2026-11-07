@@ -1,3 +1,3 @@
-echo "====== Running Pre-Push Lint Checks ======"
+echo "====== Running Pre-Push Checks ======"
 
 bash scripts/next-lint.sh
