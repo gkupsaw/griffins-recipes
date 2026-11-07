@@ -108,6 +108,14 @@ export default function RecipePage() {
                 <p className="flex-grow text-3xl md:text-8xl">Recipes</p>
               </div>
               {authenticated && (
+                <a
+                  className="text-nowrap w-fit fixed top-0 right-0 m-8 z-50 text-xl md:text-xl text-center bg-blue-900 hover:bg-blue-700 py-2 px-4 rounded cursor-pointer"
+                  href="import"
+                >
+                  Upload or edit recipes
+                </a>
+              )}
+              {authenticated && (
                 <div
                   id="Public recipes title"
                   className="flex flex-row w-full items-stretch"
@@ -184,15 +192,6 @@ export default function RecipePage() {
         </div>
       </main>
       <footer className="flex flex-row justify-items-center flex-wrap row-start-3 my-8">
-        {authenticated && (
-          <a
-            className="flex-1 hover:underline hover:underline-offset-4 text-center"
-            href="upload"
-            style={{ width: "6em" }}
-          >
-            Upload new recipe
-          </a>
-        )}
         <a
           className="flex-1 hover:underline hover:underline-offset-4 text-center text-3xl"
           href="https://github.com/gkupsaw/griffins-recipes"

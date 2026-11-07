@@ -6,18 +6,15 @@ import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthUser } from "aws-amplify/auth";
-import { downloadData, list, remove, uploadData } from "aws-amplify/storage";
-import JSZip from "jszip";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RecipeDataDAO } from "../datastore/recipe/data";
 import { RecipeImageDAO } from "../datastore/recipe/image";
-import { UserDAO } from "../datastore/user/cognito";
-import { RecipeData } from "../types/recipe/data";
-import { RecipeMetaData, TotalRecipeMetaData } from "../types/recipe/metadata";
 import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
-import { redirect } from "next/navigation";
-import { importRecipeFromLink } from "./import_remote";
+import { RecipeData } from "../types/recipe/data";
+import { RecipeMetaData } from "../types/recipe/metadata";
+import { loadRecipe } from "./load_recipe";
 
 const getDefaultRecipeData = (): RecipeData => ({
   recipeName: "",
@@ -53,28 +50,18 @@ const defaultIngredientsCount = 1;
 const defaultStepsCount = 1;
 
 export default function RecipeForm() {
-  const [submitting, setSubmitting] = useState(false);
-  const [importing, setImporting] = useState(false);
-  const [importLink, setImportLink] = useState("");
-  const [importingLink, setImportingLink] = useState(false);
   const [useMultibox, setUseMultibox] = useState(false);
-
-  const [existingRecipes, setExistingRecipes] = useState<string[] | null>(null);
-  const [existingRecipeToImport, setExistingRecipeToImport] =
-    useState<string>("");
 
   const [user, setUser] = useState<AuthUser | null>(null);
 
   const [recipeImage, setRecipeImage] = useState<File | string | null>(null);
-
-  const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData>(
-    getDefaultRecipeMetaData(),
-  );
-  const { isPrivate, recipeAuthor } = recipeMetaData;
-
   const [recipeState, setRecipeState] = useState<RecipeData>(
     getDefaultRecipeData(),
   );
+  const [recipeMetaData, setRecipeMetaData] = useState<RecipeMetaData>(
+    getDefaultRecipeMetaData(),
+  );
+
   const {
     recipeName,
     recipeDesc,
@@ -83,157 +70,24 @@ export default function RecipeForm() {
     recipeSteps,
   } = recipeState;
 
+  const { isPrivate, recipeAuthor } = recipeMetaData;
+
+  const [submitting, setSubmitting] = useState(false);
   const [recipeUrl, setRecipeUrl] = useState<string | null>(null);
 
   const [isLocalStorageLoaded, setIsLocalStorageLoaded] =
     useState<boolean>(false);
 
   useEffect(() => {
-    type SessionRecipeData = {
-      data: RecipeData;
-      metadata: RecipeMetaData;
-    };
-    async function extractSessionRecipe(): Promise<SessionRecipeData | null> {
-      const inProgressRecipe = localStorage.getItem("in-progress-recipe");
-      if (inProgressRecipe !== null) {
-        console.log(`In progress recipe data found: ${inProgressRecipe}`);
-        try {
-          const inProgressRecipeResult: SessionRecipeData =
-            JSON.parse(inProgressRecipe);
-
-          const {
-            data: inProgressRecipeData,
-            metadata: inProgressRecipeMetaData,
-          } = inProgressRecipeResult;
-          if (
-            [
-              inProgressRecipeData.recipeName,
-              inProgressRecipeData.recipeDesc,
-              ...inProgressRecipeData.recipeIngredients,
-              ...inProgressRecipeData.recipeSteps,
-            ].some((s) => s.length !== 0)
-          ) {
-            return {
-              data: {
-                recipeName: inProgressRecipeData.recipeName ?? recipeName,
-                recipeDesc: inProgressRecipeData.recipeDesc ?? recipeDesc,
-                recipeDateMilliseconds:
-                  inProgressRecipeData.recipeDateMilliseconds ??
-                  recipeDateMilliseconds,
-                recipeIngredients:
-                  inProgressRecipeData.recipeIngredients ?? recipeIngredients,
-                recipeSteps: inProgressRecipeData.recipeSteps ?? recipeSteps,
-              },
-              metadata: {
-                isPrivate: inProgressRecipeMetaData.isPrivate ?? isPrivate,
-                recipeAuthor:
-                  inProgressRecipeMetaData.recipeAuthor ?? recipeAuthor,
-              },
-            };
-          }
-        } catch (e) {
-          console.warn(`Could not parse in progress recipe data: ${e}`);
-        }
-      }
-      return null;
-    }
-
-    async function loadRecipes(topLevelFolder: string): Promise<string[]> {
-      try {
-        const existingTotalMetaData: TotalRecipeMetaData = JSON.parse(
-          await (
-            await downloadData({ path: `${topLevelFolder}/metadata.json` })
-              .result
-          ).body.text(),
-        );
-        return Object.keys(existingTotalMetaData);
-      } catch (e) {
-        window.alert(`Could not load recipes.`);
-        console.warn(`Could not load existing recipe metadata: ${e}`);
-        return [];
-      }
-    }
-
-    function loadSessionRecipe(sessionRecipe: SessionRecipeData) {
-      window.alert(
-        `Loading input from previous session${sessionRecipe.data.recipeName ? `for recipe "${sessionRecipe.data.recipeName}"` : ""}.`,
-      );
-      setRecipeState(sessionRecipe.data);
-      setRecipeMetaData(sessionRecipe.metadata);
-    }
-
-    type UrlRecipeParams = {
-      recipeDirName: string;
-      privateParam: boolean;
-    };
-    function extractUrlRecipe(): UrlRecipeParams | null {
-      const searchParams = new URLSearchParams(document.location.search);
-      const recipeDirName = searchParams.get("recipename");
-      const privateParam = searchParams.get("private") === "true";
-
-      if (recipeDirName === null) {
-        console.log("No recipe params in URL");
-        return null;
-      }
-
-      console.log("Found recipe params in URL");
-      return { recipeDirName, privateParam };
-    }
-
-    async function loadRemoteRecipe(params: UrlRecipeParams) {
-      const { recipeDirName, privateParam } = params;
-
-      await RecipeDataDAO.get(recipeDirName, privateParam)
-        .then(setRecipeState)
-        .catch(window.alert);
-
-      await RecipeMetaDataDAO.get(recipeDirName, privateParam)
-        .then(setRecipeMetaData)
-        .catch(window.alert);
-
-      await RecipeImageDAO.getUrl(recipeDirName, privateParam)
-        .then(setRecipeImage)
-        .catch((e) => {
-          console.warn(e);
-          setRecipeImage(null);
-        });
-    }
-
-    (async () => {
-      const currentUser = await UserDAO.getCurrentUser();
-      setUser(currentUser);
-
-      if (UserDAO.isAuthenticated(currentUser)) {
-        setExistingRecipes([
-          ...(await loadRecipes("recipe-metadata")),
-          ...(await loadRecipes("private-recipe-metadata")),
-        ]);
-
-        const sessionRecipe = await extractSessionRecipe();
-        const urlRecipe = extractUrlRecipe();
-
-        if (sessionRecipe && !urlRecipe) {
-          loadSessionRecipe(sessionRecipe);
-        } else if (!sessionRecipe && urlRecipe) {
-          await loadRemoteRecipe(urlRecipe);
-        } else if (sessionRecipe && urlRecipe) {
-          if (sessionRecipe.data.recipeName === urlRecipe.recipeDirName) {
-            // If the session data is for the same recipe as the URL recipe, assume that the user wants to continue where they left off.
-            loadSessionRecipe(sessionRecipe);
-          } else {
-            // Otherwise, explicitly request confirmation before clearing session data.
-            const prompt = `It looks like you were editing the recipe "${sessionRecipe.data.recipeName}" in a previous session. Would you like to clear your work so that you can edit "${urlRecipe.recipeDirName}" instead? Enter "clear" if so.`;
-            if (["clear"].includes(window.prompt(prompt) ?? "")) {
-              await loadRemoteRecipe(urlRecipe);
-            } else {
-              loadSessionRecipe(sessionRecipe);
-            }
-          }
-        }
-
-        setIsLocalStorageLoaded(true);
-      }
-    })();
+    loadRecipe(
+      recipeState,
+      recipeMetaData,
+      setUser,
+      setRecipeState,
+      setRecipeMetaData,
+      setRecipeImage,
+      setIsLocalStorageLoaded,
+    );
   }, []);
 
   useEffect(() => {
@@ -249,58 +103,6 @@ export default function RecipeForm() {
       JSON.stringify({ data: recipeState, metadata: recipeMetaData }),
     );
   }, [recipeState, recipeMetaData, isLocalStorageLoaded]);
-
-  async function handleImport() {
-    if (!existingRecipeToImport) {
-      return window.alert("No recipe name provided");
-    }
-
-    const privateParam = ["y", "Y", "yes", "Yes"].includes(
-      window.prompt("Is this recipe private? (Yes/No)") ?? "",
-    );
-
-    await RecipeDataDAO.get(existingRecipeToImport, privateParam)
-      .then(setRecipeState)
-      .catch(window.alert);
-
-    await RecipeImageDAO.getUrl(existingRecipeToImport, privateParam)
-      .then(setRecipeImage)
-      .catch((e) => {
-        console.warn(e);
-        setRecipeImage(null);
-      });
-
-    await RecipeMetaDataDAO.get(existingRecipeToImport, privateParam)
-      .then(setRecipeMetaData)
-      .catch(window.alert);
-  }
-
-  async function handleImportFromLink() {
-    const hasWork = [recipeName, ...recipeIngredients, ...recipeSteps].some(
-      (s) => s.length > 0,
-    );
-    if (
-      hasWork &&
-      !window.confirm(
-        "Replace the name, ingredients and steps with the imported recipe?",
-      )
-    ) {
-      return;
-    }
-
-    setImportingLink(true);
-    try {
-      const imported = await importRecipeFromLink(importLink.trim());
-      setRecipeState({ ...recipeState, ...imported }); // keeps description and date
-      setImportLink("");
-    } catch (e) {
-      window.alert(
-        `Could not import recipe: ${e instanceof Error ? e.message : e}`,
-      );
-    } finally {
-      setImportingLink(false);
-    }
-  }
 
   async function handleUpload() {
     if (
@@ -373,7 +175,7 @@ export default function RecipeForm() {
     }
   }
 
-  const disabled = submitting || importing || importingLink;
+  const disabled = submitting;
 
   return (
     <div className="font-sans flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20 md:px-[20%]">
@@ -487,41 +289,6 @@ export default function RecipeForm() {
                 />
               </div>
               <hr />
-              <div
-                id="Import link"
-                className="flex flex-col w-full gap-[2px] row-start-2 items-center"
-              >
-                <p className="w-full text-xl md:text-3xl text-center text-left">
-                  (New ✨) Import from another website
-                </p>
-                <div className="flex flex-row w-full text-sm/6 text-center text-left">
-                  <input
-                    type="url"
-                    className={inputClass}
-                    placeholder="Paste a recipe link - if it's compatible, ingredients and steps will be imported automatically"
-                    value={importLink}
-                    onChange={(e) => setImportLink(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter") {
-                        e.preventDefault(); // Enter would otherwise submit the <form> and reload the page
-                        if (importLink.trim() && !disabled)
-                          handleImportFromLink();
-                      }
-                    }}
-                    disabled={disabled}
-                  />
-                  <button
-                    disabled={disabled || !importLink.trim()}
-                    className={buttonClass}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleImportFromLink();
-                    }}
-                  >
-                    {importingLink ? "Importing..." : "Import"}
-                  </button>
-                </div>
-              </div>
               <div
                 id="Settings"
                 className="flex flex-col w-full gap-[2px] row-start-2 items-start"
@@ -750,58 +517,6 @@ export default function RecipeForm() {
                     }}
                   />
                 )}
-              </div>
-              <div
-                id="Import"
-                className="flex flex-col w-full gap-[2px] row-start-2 items-center"
-              >
-                <div
-                  id="Import title"
-                  className="flex flex-row w-full items-stretch"
-                >
-                  <p className="flex-grow text-xl md:text-3xl text-center text-left">
-                    Import existing recipe to edit (optional)
-                  </p>
-                </div>
-                <div className="flex flex-row w-full text-sm/6 text-center text-left">
-                  <input
-                    list="existing-recipes"
-                    className={inputClass}
-                    placeholder="Select existing recipe"
-                    value={existingRecipeToImport}
-                    onChange={(e) => setExistingRecipeToImport(e.target.value)}
-                    disabled={disabled}
-                  />
-                  <datalist id="existing-recipes">
-                    {existingRecipes?.map((recipe, i) => (
-                      <option key={i} value={recipe} />
-                    ))}
-                  </datalist>
-                  <button
-                    disabled={disabled}
-                    className={buttonClass}
-                    onClick={async (e) => {
-                      e.preventDefault();
-
-                      if (disabled) {
-                        return console.warn(
-                          "Operation in progress, cannot import",
-                        );
-                      }
-
-                      console.log("Starting import workflow...");
-                      setImporting(true);
-
-                      await handleImport();
-
-                      console.log("Upload import complete");
-                      setExistingRecipeToImport("");
-                      setImporting(false);
-                    }}
-                  >
-                    {importing ? "Importing..." : "Import"}
-                  </button>
-                </div>
               </div>
 
               <div
