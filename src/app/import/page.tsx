@@ -70,16 +70,54 @@ export default function RecipeForm() {
 
   async function handleImportFromLink() {
     setImportingLink(true);
+
+    const searchParams = new URLSearchParams();
     try {
       const imported = await importRecipeFromLink(importLink.trim());
-      setRecipeState({ ...recipeState, ...imported }); // keeps description and date
-      setImportLink("");
+
+      searchParams.set("staticrecipename", imported.recipeName.trim());
+      searchParams.set(
+        "staticrecipeingredients",
+        JSON.stringify(imported.recipeIngredients),
+      );
+      searchParams.set(
+        "staticrecipesteps",
+        JSON.stringify(imported.recipeSteps),
+      );
     } catch (e) {
+      console.warn(e);
       window.alert(
         `Could not import recipe: ${e instanceof Error ? e.message : e}`,
       );
     } finally {
       setImportingLink(false);
+    }
+
+    const url = `upload?${searchParams.toString()}`;
+    console.log(`Redirecting to ${url}...`);
+    redirect(url);
+  }
+
+  function handleImport(
+    existingRecipeToImport: string,
+    isPrivate: boolean,
+    setImporting: (value: boolean) => void,
+  ) {
+    if (disabled) {
+      return console.warn("Operation in progress, cannot import");
+    }
+
+    if (existingRecipeToImport.trim() && !disabled) {
+      console.log("Starting import workflow...");
+      setImporting(true);
+
+      const searchParams = new URLSearchParams();
+      searchParams.set("recipename", existingRecipeToImport.trim());
+      searchParams.set("private", isPrivate.toString());
+
+      const url = `upload?${searchParams.toString()}`;
+      console.log(`Redirecting to ${url}...`);
+      redirect(url);
     }
   }
 
@@ -194,27 +232,11 @@ export default function RecipeForm() {
                       onClick={async (e) => {
                         e.preventDefault();
 
-                        if (disabled) {
-                          return console.warn(
-                            "Operation in progress, cannot import",
-                          );
-                        }
-
-                        if (existingRecipeToImport.trim() && !disabled) {
-                          console.log("Starting import workflow...");
-                          setImporting(true);
-
-                          const searchParams = new URLSearchParams();
-                          searchParams.set(
-                            "recipename",
-                            existingRecipeToImport.trim(),
-                          );
-                          searchParams.set("private", isPrivate.toString());
-
-                          const url = `upload?${searchParams.toString()}`;
-                          console.log(`Redirecting to ${url}...`);
-                          redirect(url);
-                        }
+                        handleImport(
+                          existingRecipeToImport,
+                          isPrivate,
+                          setImporting,
+                        );
                       }}
                     >
                       {importing ? "Importing..." : "Import"}

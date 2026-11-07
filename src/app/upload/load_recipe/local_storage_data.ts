@@ -1,7 +1,7 @@
 import { RecipeData } from "../../types/recipe/data";
 import { RecipeMetaData } from "../../types/recipe/metadata";
 
-type SessionRecipeData = {
+export type SessionRecipeData = {
   data: RecipeData;
   metadata: RecipeMetaData;
 };

@@ -4,7 +4,7 @@ import { RecipeMetaDataDAO } from "../../datastore/recipe/metadata";
 import { RecipeData } from "../../types/recipe/data";
 import { RecipeMetaData } from "../../types/recipe/metadata";
 
-type UrlRecipeParams = {
+export type UrlRecipeParams = {
   recipeDirName: string;
   privateParam: boolean;
 };
