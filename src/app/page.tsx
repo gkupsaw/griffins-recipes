@@ -100,7 +100,7 @@ export default function RecipePage() {
                 initial={{ opacity: 1 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 1 }}
+                transition={{ duration: 0.5 }}
               >
                 <Icon
                   icon="eos-icons:bubble-loading"
@@ -115,7 +115,7 @@ export default function RecipePage() {
                   key="title"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  transition={{ duration: 1 }}
+                  transition={{ duration: 0.5 }}
                 >
                   <p className="flex-grow text-3xl md:text-8xl">Recipes</p>
                 </motion.div>
@@ -126,21 +126,21 @@ export default function RecipePage() {
                     key="uploadlink"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
-                    transition={{ duration: 1, delay: 0.5 }}
+                    transition={{ duration: 0.5, delay: 0.5 }}
                   >
                     Upload or edit recipes
                   </motion.a>
                 )}
-                  <motion.div
-                    id="Public recipes title"
-                    className="flex flex-row w-full items-stretch"
-                    key="public-title"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 1 }}
-                  >
-                    <p className="flex-grow text-xl md:text-3xl">Public</p>
-                  </motion.div>
+                <motion.div
+                  id="Public recipes title"
+                  className="flex flex-row w-full items-stretch"
+                  key="public-title"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.5 }}
+                >
+                  <p className="flex-grow text-xl md:text-3xl">Public</p>
+                </motion.div>
                 <ul className={listClass}>
                   {Object.entries(publicRecipes)
                     .sort(([a], [b]) => sortAuthors(a, b))
@@ -151,7 +151,7 @@ export default function RecipePage() {
                           className="flex flex-row w-full items-stretch mb-4"
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          transition={{ duration: 1, delay: i * 0.25 }}
+                          transition={{ duration: 0.5, delay: i * 0.25 }}
                         >
                           <p className="flex-grow text-xl">{author}</p>
                         </motion.div>
@@ -161,7 +161,10 @@ export default function RecipePage() {
                             className={inputClass}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            transition={{ duration: 1, delay: i * 0.25 + j * 0.25 }}
+                            transition={{
+                              duration: 0.5,
+                              delay: i * 0.25 + j * 0.25,
+                            }}
                           >
                             <a
                               className="hover:underline hover:underline-offset-4 text-center text-xl p-8"
@@ -184,12 +187,11 @@ export default function RecipePage() {
                       key="private-title"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      transition={{ duration: 1 }}
+                      transition={{ duration: 0.5 }}
                     >
                       <p className="flex-grow text-xl md:text-3xl">Private</p>
                     </motion.div>
-                    <ul className={listClass}
-                    >
+                    <ul className={listClass}>
                       {Object.entries(privateRecipes)
                         .sort(([a], [b]) => sortAuthors(a, b))
                         .map(([author, recipes], i) => (
@@ -199,7 +201,7 @@ export default function RecipePage() {
                               className="flex flex-row w-full items-stretch mb-4"
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              transition={{ duration: 1, delay: i * 0.25 }}
+                              transition={{ duration: 0.5, delay: i * 0.25 }}
                             >
                               <p className="flex-grow text-xl text-center">
                                 {author}
@@ -211,7 +213,10 @@ export default function RecipePage() {
                                 className={inputClass}
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
-                                transition={{ duration: 1, delay: i * 0.25 + j * 0.25 }}
+                                transition={{
+                                  duration: 0.5,
+                                  delay: i * 0.25 + j * 0.25,
+                                }}
                               >
                                 <a
                                   className="hover:underline hover:underline-offset-4 text-center text-xl p-8"

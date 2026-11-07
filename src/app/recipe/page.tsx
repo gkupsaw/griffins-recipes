@@ -14,6 +14,8 @@ import defaultRecipeImage from "../img/default.png";
 import { RecipeData } from "../types/recipe/data";
 import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
 import { RecipeMetaData } from "../types/recipe/metadata";
+import { motion, AnimatePresence } from "framer-motion";
+import { Icon } from "@iconify/react";
 
 const gray = {
   primary: "bg-gray-800",
@@ -23,8 +25,6 @@ const gray = {
 const listClass =
   "w-full list-inside list-decimal text-sm/6 text-center sm:text-left";
 const inputClass = `text-sm/6 text-center text-left w-full ${gray.primary} p-2 my-1 rounded-sm`;
-
-const LOADING = "Loading...";
 
 export default function RecipePage() {
   const [recipeData, setRecipeData] = useState<RecipeData | null>(null);
@@ -80,138 +80,226 @@ export default function RecipePage() {
   return (
     <div className="font-mono flex flex-grow flex-col items-center justify-items-center min-h-screen sm:pt-20 sm:pl-20 sm:pr-20">
       <main className="flex flex-grow flex-col gap-[32px] row-start-2 justify-center">
-        <div
-          id="Title"
-          className="flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl"
-        >
-          <p className="text-center pb-4">
-            {loading ? LOADING : recipeData.recipeName}
-          </p>
+        <AnimatePresence mode="wait">
           {loading ? (
-            <FontAwesomeIcon
-              icon={faImage}
-              style={{ width: 360, height: 360 }}
-            />
+            <motion.div
+              key="loading"
+              initial={{ opacity: 1 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Icon
+                icon="eos-icons:bubble-loading"
+                style={{ fontSize: "128px" }}
+              />
+            </motion.div>
           ) : (
-            <Image
-              src={recipeImage === null ? defaultRecipeImage : recipeImage}
-              alt="Recipe photo"
-              height={360}
-              width={360}
-              style={{ height: "auto", width: "auto" }}
-              priority
-            />
-          )}
-        </div>
-        <div
-          id="Content"
-          className="flex w-full flex-col row-start-2 items-center"
-        >
-          <p className="text-3xl w-full text-left">
-            Born on{" "}
-            {loading
-              ? LOADING
-              : new Date(
-                  recipeData.recipeDateMilliseconds,
-                ).toLocaleDateString()}
-          </p>
-          {recipeMetaData?.recipeAuthor && (
-            <p className={inputClass}>
-              Authored with love by {recipeMetaData.recipeAuthor}
-            </p>
-          )}
-          <p className={inputClass}>
-            {loading ? LOADING : `Description: ${recipeData.recipeDesc}`}
-          </p>
-          <hr />
-          <div
-            id="Ingredients"
-            className="flex w-full flex-col gap-[2px] row-start-2 items-center"
-          >
-            <div
-              id="Ingredients title"
-              className="flex flex-row w-full items-stretch"
-            >
-              <p className="flex-grow text-3xl text-center text-left">
-                Ingredients
-              </p>
-            </div>
-            <ul className={listClass}>
-              {(loading ? [LOADING] : recipeData.recipeIngredients).map(
-                (ingredient, i) => (
-                  <li key={i} className={inputClass}>
-                    {ingredient}
-                  </li>
-                ),
-              )}
-            </ul>
-          </div>
-          <div
-            id="Steps"
-            className="flex flex-col w-full gap-[2px] row-start-2 items-center"
-          >
-            <div
-              id="Steps title"
-              className="flex flex-row w-full items-stretch"
-            >
-              <p className="flex-grow text-3xl text-center text-left">Steps</p>
-            </div>
-            <ul className={listClass}>
-              {(loading ? [LOADING] : recipeData.recipeSteps).map((step, i) => (
-                <li key={i} className={inputClass}>
-                  {step}
-                </li>
-              ))}
-            </ul>
-          </div>
-          {recipeData && UserDAO.isAuthenticated(user) && (
             <>
-              <a
-                className="flex-1 hover:underline hover:underline-offset-4 text-center"
-                href={`upload?recipename=${recipeData.recipeName}&private=${isPrivate}`}
-                style={{ width: "6em" }}
+              <div
+                id="Title"
+                className="flex flex-1 flex-col row-start-2 items-center sm:items-center text-5xl"
               >
-                Edit
-              </a>
-              <p
-                className="flex-1 hover:underline hover:underline-offset-4 text-center"
-                onClick={async () => {
-                  if (
-                    !window.confirm(
-                      "Are you sure you want to delete this recipe?",
-                    )
-                  ) {
-                    return;
-                  }
-
-                  // Only remove the metadata marker - keep recipe data around for recovery if needed
-                  await RecipeMetaDataDAO.remove(
-                    recipeData.recipeName,
-                    isPrivate,
-                  );
-
-                  // Nullify data to trigger loading screen
-                  setRecipeData(null);
-
-                  // Redirect home
-                  redirect(
-                    window.location.href.split("/").slice(0, -1).join("/"),
-                  );
-                }}
-                style={{ width: "6em", cursor: "pointer" }}
+                <motion.p
+                  className="text-center pb-4"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.25 }}
+                >
+                  {recipeData.recipeName}
+                </motion.p>
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.5 }}
+                >
+                  <Image
+                    src={
+                      recipeImage === null ? defaultRecipeImage : recipeImage
+                    }
+                    alt="Recipe photo"
+                    height={360}
+                    width={360}
+                    style={{ height: "auto", width: "auto" }}
+                    priority
+                  />
+                </motion.div>
+              </div>
+              <div
+                id="Content"
+                className="flex w-full flex-col row-start-2 items-center"
               >
-                Delete
-              </p>
-              <a
-                className="flex-1 hover:underline hover:underline-offset-4 text-center"
-                href="upload"
-                style={{ width: "6em" }}
-              >
-                Upload new
-              </a>
+                <motion.p
+                  className="text-3xl w-full text-left"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.75 }}
+                >
+                  Born on{" "}
+                  {new Date(
+                    recipeData.recipeDateMilliseconds,
+                  ).toLocaleDateString()}
+                </motion.p>
+                {recipeMetaData?.recipeAuthor && (
+                  <motion.p
+                    className={inputClass}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.5, delay: 0.85 }}
+                  >
+                    Authored with love by {recipeMetaData.recipeAuthor}
+                  </motion.p>
+                )}
+                <motion.p
+                  className={inputClass}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 0.95 }}
+                >
+                  Description: {recipeData.recipeDesc}
+                </motion.p>
+                <motion.hr
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.5, delay: 1 }}
+                />
+                <div
+                  id="Ingredients"
+                  className="flex w-full flex-col gap-[2px] row-start-2 items-center"
+                >
+                  <div
+                    id="Ingredients title"
+                    className="flex flex-row w-full items-stretch"
+                  >
+                    <motion.p
+                      className="flex-grow text-3xl text-center text-left"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 1 }}
+                    >
+                      Ingredients
+                    </motion.p>
+                  </div>
+                  <ul className={listClass}>
+                    {recipeData.recipeIngredients.map((ingredient, i) => (
+                      <motion.li
+                        key={i}
+                        className={inputClass}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, delay: 1 + i * 0.1 }}
+                      >
+                        {ingredient}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
+                <div
+                  id="Steps"
+                  className="flex flex-col w-full gap-[2px] row-start-2 items-center"
+                >
+                  <div
+                    id="Steps title"
+                    className="flex flex-row w-full items-stretch"
+                  >
+                    <motion.p
+                      className="flex-grow text-3xl text-center text-left"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 1.25 }}
+                    >
+                      Steps
+                    </motion.p>
+                  </div>
+                  <ul className={listClass}>
+                    {recipeData.recipeSteps.map((step, i) => (
+                      <motion.li
+                        key={i}
+                        className={inputClass}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.5, delay: 1.25 + i * 0.1 }}
+                      >
+                        {step}
+                      </motion.li>
+                    ))}
+                  </ul>
+                </div>
+                {recipeData && UserDAO.isAuthenticated(user) && (
+                  <>
+                    <motion.a
+                      className="flex-1 hover:underline hover:underline-offset-4 text-center"
+                      href={`upload?recipename=${recipeData.recipeName}&private=${isPrivate}`}
+                      style={{ width: "6em" }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 2 }}
+                    >
+                      Edit
+                    </motion.a>
+                    <motion.p
+                      className="flex-1 hover:underline hover:underline-offset-4 text-center"
+                      onClick={async () => {
+                        if (
+                          !window.confirm(
+                            "Are you sure you want to delete this recipe?",
+                          )
+                        ) {
+                          return;
+                        }
+
+                        // Only remove the metadata marker - keep recipe data around for recovery if needed
+                        await RecipeMetaDataDAO.remove(
+                          recipeData.recipeName,
+                          isPrivate,
+                        );
+
+                        // Nullify data to trigger loading screen
+                        setRecipeData(null);
+
+                        // Redirect home
+                        redirect(
+                          window.location.href
+                            .split("/")
+                            .slice(0, -1)
+                            .join("/"),
+                        );
+                      }}
+                      style={{ width: "6em", cursor: "pointer" }}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 2 }}
+                    >
+                      Delete
+                    </motion.p>
+                    <motion.a
+                      className="flex-1 hover:underline hover:underline-offset-4 text-center"
+                      href="import"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5, delay: 2 }}
+                    >
+                      Edit others or upload new
+                    </motion.a>
+                  </>
+                )}
+              </div>
             </>
           )}
-        </div>
+        </AnimatePresence>
       </main>
       <footer className="flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8">
         <a
