@@ -119,16 +119,18 @@ export default function RecipePage() {
                   <p className="flex-grow text-3xl md:text-8xl">Recipes</p>
                 </motion.div>
                 {authenticated && (
-                  <motion.a
-                    className="text-nowrap w-fit fixed top-0 right-0 m-8 z-50 text-xl md:text-xl text-center bg-blue-900 hover:bg-blue-700 py-2 px-4 rounded cursor-pointer"
-                    href="import"
-                    key="uploadlink"
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    transition={{ duration: 0.5, delay: 0.5 }}
-                  >
-                    Upload or edit recipes
-                  </motion.a>
+                  <div className="flex flex-row w-full justify-center">
+                    <motion.a
+                      className="text-nowrap w-fit text-xl md:text-xl text-center bg-blue-900 hover:bg-blue-700 py-2 px-4 rounded cursor-pointer"
+                      href="import"
+                      key="uploadlink"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ duration: 0.5, delay: 0.5 }}
+                    >
+                      Upload or edit recipes
+                    </motion.a>
+                  </div>
                 )}
                 <motion.div
                   id="Public recipes title"
