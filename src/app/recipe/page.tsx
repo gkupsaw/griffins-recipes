@@ -1,21 +1,19 @@
 "use client";
 
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { faImage } from "@fortawesome/free-regular-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Icon } from "@iconify/react";
 import { AuthUser } from "aws-amplify/auth";
+import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RecipeDataDAO } from "../datastore/recipe/data";
 import { RecipeImageDAO } from "../datastore/recipe/image";
+import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
 import { UserDAO } from "../datastore/user/cognito";
+import Footer from "../footer";
 import defaultRecipeImage from "../img/default.png";
 import { RecipeData } from "../types/recipe/data";
-import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
 import { RecipeMetaData } from "../types/recipe/metadata";
-import { motion, AnimatePresence } from "framer-motion";
-import { Icon } from "@iconify/react";
 
 const gray = {
   primary: "bg-gray-800",
@@ -301,35 +299,7 @@ export default function RecipePage() {
           )}
         </AnimatePresence>
       </main>
-      <footer className="flex flex-row justify-items-center items-center flex-wrap row-start-3 my-8">
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center"
-          onClick={() =>
-            redirect(window.location.href.split("/").slice(0, -1).join("/"))
-          }
-          style={{ width: "6em", cursor: "pointer" }}
-        >
-          Home
-        </a>
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center text-3xl"
-          href="https://github.com/gkupsaw/griffins-recipes"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "6em" }}
-        >
-          <FontAwesomeIcon icon={faGithub} />
-        </a>
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center"
-          href="https://www.griffinkupsaw.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "6em" }}
-        >
-          Click me!
-        </a>
-      </footer>
+      <Footer hasHome={true} />
     </div>
   );
 }

@@ -2,16 +2,15 @@
 
 import { Authenticator } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { faImage } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { AuthUser } from "aws-amplify/auth";
 import Image from "next/image";
-import { redirect } from "next/navigation";
 import { useEffect, useState } from "react";
 import { RecipeDataDAO } from "../datastore/recipe/data";
 import { RecipeImageDAO } from "../datastore/recipe/image";
 import { RecipeMetaDataDAO } from "../datastore/recipe/metadata";
+import Footer from "../footer";
 import { RecipeData } from "../types/recipe/data";
 import { RecipeMetaData } from "../types/recipe/metadata";
 import { loadRecipe } from "./load_recipe";
@@ -185,7 +184,7 @@ export default function RecipeForm() {
   const disabled = submitting;
 
   return (
-    <div className="font-sans flex flex-col items-center justify-items-center min-h-screen p-8 pb-20 gap-8 sm:p-20 md:px-[20%]">
+    <div className="font-sans flex flex-col items-center justify-items-center min-h-screen sm:pt-20 sm:pl-20 sm:pr-20">
       <Authenticator hideSignUp>
         {({ signOut }) => (
           <form className="font-mono flex flex-col gap-[32px] row-start-2 w-full max-w-full">
@@ -651,35 +650,7 @@ export default function RecipeForm() {
           </form>
         )}
       </Authenticator>
-      <footer className="flex flex-row justify-items-center items-center">
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center"
-          onClick={() =>
-            redirect(window.location.href.split("/").slice(0, -1).join("/"))
-          }
-          style={{ width: "5em", cursor: "pointer" }}
-        >
-          Home
-        </a>
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center text-3xl"
-          href="https://github.com/gkupsaw/griffins-recipes"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "5em" }}
-        >
-          <FontAwesomeIcon icon={faGithub} />
-        </a>
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center"
-          href="https://www.griffinkupsaw.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "5em" }}
-        >
-          Click me!
-        </a>
-      </footer>
+      <Footer hasHome={true} />
     </div>
   );
 }

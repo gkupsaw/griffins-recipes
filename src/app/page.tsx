@@ -1,14 +1,13 @@
 "use client";
 
-import { faGithub } from "@fortawesome/free-brands-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { Icon } from "@iconify/react";
 import { AuthUser } from "aws-amplify/auth";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { RecipeMetaDataDAO } from "./datastore/recipe/metadata";
 import { UserDAO } from "./datastore/user/cognito";
+import Footer from "./footer";
 import { RecipeMetaData } from "./types/recipe/metadata";
-import { Icon } from "@iconify/react";
-import { motion, AnimatePresence } from "framer-motion";
 
 const MISC_AUTHOR = "Misc";
 
@@ -238,26 +237,7 @@ export default function RecipePage() {
           </AnimatePresence>
         </div>
       </main>
-      <footer className="flex flex-row justify-items-center flex-wrap row-start-3 my-8">
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center text-3xl"
-          href="https://github.com/gkupsaw/griffins-recipes"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "5em" }}
-        >
-          <FontAwesomeIcon icon={faGithub} />
-        </a>
-        <a
-          className="flex-1 hover:underline hover:underline-offset-4 text-center"
-          href="https://www.griffinkupsaw.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{ width: "6em" }}
-        >
-          Click me!
-        </a>
-      </footer>
+      <Footer />
     </div>
   );
 }
